@@ -8,6 +8,7 @@ import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
 import com.hss01248.net.config.NetDefaultConfig;
 import com.hss01248.net.retrofit.progress.ProgressInterceptor;
+import com.hss01248.net.retrofit.progress.ProgressRequstInterceptor;
 import com.hss01248.net.wrapper.CommonHelper;
 import com.hss01248.net.wrapper.MyNetListener;
 import com.hss01248.net.wrapper.MyNetUtil;
@@ -35,7 +36,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Administrator on 2016/9/5 0005.
@@ -50,6 +50,11 @@ public class RetrofitAdapter extends NetAdapter<Call> {
     ApiService serviceDownload;
     //需要单独为下载的call设置Retrofit: 主要是超时时间设置为0
     Retrofit retrofitDownload;
+
+
+    //上传的client
+    ApiService serviceUpload;
+    Retrofit retrofitUpload;
 
 
 
@@ -93,10 +98,27 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                 .Builder()
                 .baseUrl(NetDefaultConfig.baseUrl)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create()) // 使用Gson作为数据转换器
+                // .addConverterFactory(GsonConverterFactory.create()) // 使用Gson作为数据转换器
                 .build();
 
         serviceDownload = retrofitDownload.create(ApiService.class);
+    }
+
+    private void initUpload() {
+        OkHttpClient.Builder httpBuilder=new OkHttpClient.Builder();
+        OkHttpClient client=httpBuilder.readTimeout(0, TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
+                .retryOnConnectionFailure(true)//重试
+                .addInterceptor(new ProgressRequstInterceptor())//上传时更新进度
+                .build();
+
+        retrofitUpload = new Retrofit
+                .Builder()
+                .baseUrl(NetDefaultConfig.baseUrl)
+                .client(client)
+                .build();
+
+        serviceUpload = retrofitDownload.create(ApiService.class);
     }
 
     public static  RetrofitAdapter getInstance(){
@@ -292,6 +314,12 @@ public class RetrofitAdapter extends NetAdapter<Call> {
     @Override
     protected Call newMultiUploadRequest(final ConfigInfo configInfo) {
        // final long time = System.currentTimeMillis();
+
+        if (serviceUpload == null){
+            initUpload();
+        }
+
+
         Map<String, RequestBody> params = new HashMap<>();
         List<MultipartBody.Part> parts =  new ArrayList<>();
 
