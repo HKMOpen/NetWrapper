@@ -1,9 +1,12 @@
 package com.hss01248.net.wrapper;
 
 import android.content.Context;
+import android.text.TextUtils;
 
+import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
+import com.litesuits.android.async.SimpleTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +39,10 @@ public abstract class NetAdapter<T> implements Netable<T>{
             CommonHelper.addToken(configInfo.params);
         }
 
+        if (getCache(configInfo)){
+            return null;
+        }
+
 
         T request = generateNewRequest(configInfo);
 
@@ -50,6 +57,59 @@ public abstract class NetAdapter<T> implements Netable<T>{
         addToQunue(request);
 
         return request;
+    }
+
+    private <E> boolean getCache(final ConfigInfo<E> configInfo) {
+        switch (configInfo.type){
+            case ConfigInfo.TYPE_STRING:
+            case ConfigInfo.TYPE_JSON:
+            case ConfigInfo.TYPE_JSON_FORMATTED:{
+
+
+
+                //拿缓存
+
+                if (configInfo.shouldReadCache){
+
+                    final long time = System.currentTimeMillis();
+                    SimpleTask<String> simple = new SimpleTask<String>() {
+
+                        @Override
+                        protected String doInBackground() {
+                            return ACache.get(MyNetUtil.context).getAsString(CommonHelper.getCacheKey(configInfo));
+                        }
+
+                        @Override
+                        protected void onPostExecute(String result) {
+
+                            if (TextUtils.isEmpty(result)){
+                                configInfo.shouldReadCache = false;
+
+                                newCommonStringRequest(configInfo);//没有缓存就去访问网络
+                            }else {
+                                configInfo.isFromCache = true;
+                                CommonHelper.parseStringByType(time,result,configInfo,NetAdapter.this);
+                            }
+
+                        }
+                    };
+                    simple.execute();
+                }else {
+                    return false;
+                }
+
+            }
+
+
+
+
+
+            case ConfigInfo.TYPE_DOWNLOAD:
+            case ConfigInfo.TYPE_UPLOAD_SINGLE:
+            case ConfigInfo.TYPE_UPLOAD_MULTIPLE:
+                return false;
+            default:return false;
+        }
     }
 
     protected abstract boolean isAppend();

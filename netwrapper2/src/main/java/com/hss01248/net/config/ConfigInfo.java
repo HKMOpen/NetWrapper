@@ -52,7 +52,9 @@ public class ConfigInfo<T> {
    // public boolean forceGetNet = true;
     public boolean shouldReadCache = false;
     public boolean shouldCacheResponse = false;
-    public long cacheTime = NetDefaultConfig.CACHE_TIME;
+    public long cacheTime = NetDefaultConfig.CACHE_TIME; //单位秒
+
+    public boolean isFromCache = false;
 
     //優先級
     public int priority = Priority_NORMAL;

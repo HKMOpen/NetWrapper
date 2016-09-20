@@ -3,9 +3,11 @@ package com.hss01248.net.wrapper;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.NetDefaultConfig;
+import com.litesuits.android.async.SimpleTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +20,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimerTask;
 
 /**
@@ -45,6 +48,25 @@ public class CommonHelper {
         }
 
         return url;
+    }
+
+
+    public static String getCacheKey(ConfigInfo configInfo){
+        String url = configInfo.url;
+        Map<String,String> map = configInfo.params;
+        StringBuilder stringBuilder = new StringBuilder(100);
+        stringBuilder.append(url);
+        int size = map.size();
+        Set<Map.Entry<String,String>> set = map.entrySet();
+        if (size>0){
+           for (Map.Entry<String,String> entry: set){
+               stringBuilder.append(entry.getKey()).append(entry.getValue());
+           }
+
+        }
+
+        return stringBuilder.toString();
+
     }
 
 
@@ -83,7 +105,7 @@ public class CommonHelper {
 
 
     public  static  <E> void parseStandJsonStr(String string, long time, final ConfigInfo<E> configInfo,
-                                               final NetAdapter adapter) throws JSONException {
+                                               final NetAdapter adapter)  {
         if (isJsonEmpty(string)){//先看是否为空
             parseInTime(time,configInfo, new Runnable() {
                 @Override
@@ -98,7 +120,19 @@ public class CommonHelper {
             Type objectType = new TypeToken<BaseNetBean<E>>() {}.getType();
             final BaseNetBean<E> bean = gson.fromJson(string,objectType);*/
 
-            JSONObject object = new JSONObject(string);
+            JSONObject object = null;
+            try {
+                object = new JSONObject(string);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                parseInTime(time,configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onError("json 格式异常");
+                    }
+                });
+                return;
+            }
 
             final String dataStr = object.optString(NetDefaultConfig.KEY_DATA);
             final int code = object.optInt(NetDefaultConfig.KEY_CODE);
@@ -142,14 +176,17 @@ public class CommonHelper {
                         if (data.startsWith("{")){
                             E bean =  MyJson.parseObject(data,configInfo.clazz);
                             configInfo.listener.onSuccessObj(bean ,response,data,code,msg);
+                            cacheResponse(response, configInfo);
                         }else if (data.startsWith("[")){
                             List<E> beans =  MyJson.parseArray(data,configInfo.clazz);
                             configInfo.listener.onSuccessArr(beans,response,data,code,msg);
+                            cacheResponse(response, configInfo);
                         }
 
                     }catch (Exception e){
                         e.printStackTrace();
                         configInfo.listener.onError(e.toString());
+                        return;
                     }
                 }
 
@@ -297,5 +334,79 @@ public class CommonHelper {
     }
 
 
+    public static  void parseStringByType(final long time, final String string, final ConfigInfo configInfo, NetAdapter adapter) {
+        switch (configInfo.type){
+            case ConfigInfo.TYPE_STRING:
+
+                //缓存
+                cacheResponse(string, configInfo);
+
+                //处理结果
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onSuccess(string, string);
+                    }
+                });
+                break;
+            case ConfigInfo.TYPE_JSON:
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        parseCommonJson(time,string,configInfo);
+                    }
+                });
+
+                break;
+            case ConfigInfo.TYPE_JSON_FORMATTED:
+                parseStandJsonStr(string, time, configInfo,adapter);
+                break;
+
+        }
+    }
+
+    private static void cacheResponse(final String string, final ConfigInfo configInfo) {
+        if (configInfo.shouldCacheResponse && !configInfo.isFromCache && configInfo.cacheTime >0){
+            SimpleTask<Void> simple = new SimpleTask<Void>() {
+
+                @Override
+                protected Void doInBackground() {
+                     ACache.get(MyNetUtil.context).put(getCacheKey(configInfo),string, (int) (configInfo.cacheTime));
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void result) {
+                }
+            };
+            simple.execute();
+        }
+    }
+
+    private static <E> void parseCommonJson(long time, String string, ConfigInfo<E> configInfo) {
+
+        if (isJsonEmpty(string)){
+            configInfo.listener.onEmpty();
+        }else {
+            try{
+
+                if (string.startsWith("{")){
+                    E bean =  MyJson.parseObject(string,configInfo.clazz);
+                    configInfo.listener.onSuccessObj(bean ,string,string,0,"");
+                    cacheResponse(string, configInfo);
+                }else if (string.startsWith("[")){
+                    List<E> beans =  MyJson.parseArray(string,configInfo.clazz);
+                    configInfo.listener.onSuccessArr(beans,string,string,0,"");
+                    cacheResponse(string, configInfo);
+                }else {
+                    configInfo.listener.onError("不是标准json格式");
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+                configInfo.listener.onError(e.toString());
+            }
+        }
+    }
 }
 
