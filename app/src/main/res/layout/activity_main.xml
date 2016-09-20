@@ -17,18 +17,48 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button"/>
+        android:text="get String"
+        android:id="@+id/get_string"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button2"/>
+        android:text="post String"
+        android:id="@+id/post_string"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button3"/>
+        android:text="get json"
+        android:id="@+id/get_json"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post json"
+        android:id="@+id/post_json"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="get standard json"
+        android:id="@+id/get_standard_json"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post standard json"
+        android:id="@+id/post_standard_json"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="download"
+        android:id="@+id/download"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="upload"
+        android:id="@+id/upload"/>
 </LinearLayout>

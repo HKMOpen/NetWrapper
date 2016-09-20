@@ -2,23 +2,33 @@ package com.hss01248.net.retrofit;
 
 import android.util.Log;
 
-import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
 import com.hss01248.net.config.NetDefaultConfig;
 import com.hss01248.net.retrofit.progress.ProgressInterceptor;
 import com.hss01248.net.wrapper.CommonHelper;
+import com.hss01248.net.wrapper.MyJson;
 import com.hss01248.net.wrapper.MyNetListener;
 import com.hss01248.net.wrapper.NetAdapter;
+
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,7 +67,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                 .Builder()
                 .baseUrl(NetDefaultConfig.baseUrl)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create()) // 使用Gson作为数据转换器
+               // .addConverterFactory(GsonConverterFactory.create()) // 使用Gson作为数据转换器
                 .build();
 
         service = retrofit.create(ApiService.class);
@@ -120,20 +130,51 @@ public class RetrofitAdapter extends NetAdapter<Call> {
     @Override
     protected <E> Call newStandardJsonRequest(final ConfigInfo<E> configInfo) {
         final long time = System.currentTimeMillis();
-
-        Call<BaseNetBean<E>> call;
+        Call<ResponseBody> call;
 
         if (configInfo.method == HttpMethod.GET){
-            call = service.getStandradJson(configInfo.url,configInfo.params);
+            call = service.executGet(configInfo.url,configInfo.params);
         }else if (configInfo.method == HttpMethod.POST){
-            call = service.postStandradJson(configInfo.url,configInfo.params);
+            call = service.executePost(configInfo.url,configInfo.params);
         }else {
             call = null;
             return call;
         }
+
         configInfo.tag = call;
 
-        call.enqueue(new Callback<BaseNetBean<E>>() {
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String string = "";
+                try {
+                    string =  response.body().string();
+
+                    CommonHelper.parseStandJsonStr(string, time, configInfo,RetrofitAdapter.this);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    onFailure(call,e);
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                    onFailure(call,e);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, final Throwable t) {
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onError(t.toString());
+                    }
+                });
+            }
+        });
+
+      /*  call.enqueue(new Callback<BaseNetBean<E>>() {
             @Override
             public void onResponse(Call<BaseNetBean<E>> call, Response<BaseNetBean<E>> response) {
                 BaseNetBean<E> baseBean = response.body();
@@ -146,20 +187,22 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                CommonHelper.parseErrorInTime(time,t.toString(),configInfo);
 
             }
-        });
+        });*/
         return call;
     }
 
+
     @Override
     protected <E> Call newCommonJsonRequest(final ConfigInfo<E> configInfo) {
-        final long time = System.currentTimeMillis();
+       /* final long time = System.currentTimeMillis();
 
         final Call<E> call;
 
         if (configInfo.method == HttpMethod.GET){
-            call = service.getCommonJson(configInfo.url,configInfo.params);
+            call = service.getCommonJson(configInfo.url,configInfo.params,configInfo);// 怎么把E传到getCommonJson方法上去?接口上不能再定义泛型
+            // java.lang.IllegalArgumentException: Method return type must not include a type variable or wildcard: retrofit2.Call<T>
         }else if (configInfo.method == HttpMethod.POST){
-            call = service.postCommonJson(configInfo.url,configInfo.params);
+            call = service.postCommonJson(configInfo.url,configInfo.params,configInfo);
         }else {
             call = null;
             return call;
@@ -184,54 +227,8 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                 CommonHelper.parseErrorInTime(time,t.toString(),configInfo);
 
             }
-        });
-        return call;
-    }
+        });*/
 
-    @Override
-    protected Call newMultiUploadRequest(ConfigInfo configInfo) {
-        return null;
-    }
-
-    @Override
-    protected Call newSingleUploadRequest( ConfigInfo configInfo) {
-        return null;
-    }
-
-    @Override
-    protected Call newDownloadRequest( final ConfigInfo configInfo) {
-        final long time = System.currentTimeMillis();
-        if (serviceDownload == null){
-            initDownload();
-        }
-        Call<ResponseBody> call = serviceDownload.download(configInfo.url);
-        configInfo.listener.registEventBus();
-
-        configInfo.tag = call;
-
-        //todo 改成在子线程中执行
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.e("download","onResponse finished");
-                //开子线程将文件写到指定路径中
-                writeResponseBodyToDisk(response.body(),configInfo.filePath,configInfo.listener);
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                CommonHelper.parseErrorInTime(time,t.toString(),configInfo);
-            }
-        });
-        return call;
-    }
-
-    @Override
-    protected Call newCommonStringRequest(final ConfigInfo configInfo) {
-
-        Log.e("url","newCommonStringRequest:"+configInfo.url);
-        //todo 分方法:
         final long time = System.currentTimeMillis();
         Call<ResponseBody> call;
 
@@ -254,17 +251,326 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                 String string = "";
                 try {
                     string =  response.body().string();
-                    CommonHelper.parseSuccessInTime(time,string,configInfo);
+
+                    if (CommonHelper.isJsonEmpty(string)){//先看是否为空
+                        CommonHelper.parseInTime(time,configInfo, new Runnable() {
+                            @Override
+                            public void run() {
+                                configInfo.listener.onEmpty();
+                            }
+                        });
+                    }else {//解析jsonArray
+                        /*if (configInfo.isJsonArray){
+                            final List<E> beans = MyJson.parseArray(string,configInfo.clazz);
+                            final String finalString1 = string;
+                            CommonHelper.parseInTime(time, new Runnable() {
+                                @Override
+                                public void run() {
+                                    configInfo.listener.onSuccess(beans, finalString1);
+                                }
+                            },configInfo);
+
+                        }else {//解析jsonObj*/
+                            final E bean = MyJson.parseObject(string,configInfo.clazz);
+                            final String finalString1 = string;
+                        //configInfo.listener.onSuccess(bean, finalString1);
+                            CommonHelper.parseInTime(time,configInfo, new Runnable() {
+                                @Override
+                                public void run() {
+                                    configInfo.listener.onSuccess(bean, finalString1);
+                                }
+                            });
+
+                    }
+
+
+
+
+
+
+                    //gson 解析 放到子线程  https://www.zhihu.com/question/27216298
+                   /* Gson gson = new Gson();
+                    Type objectType = new TypeToken<E>() {}.getType();
+                    final E bean = gson.fromJson(string,objectType);
+                    Log.e("tag",bean+"");
+                    if (bean == null){
+                        onFailure(call,new JSONException("json parse error"));
+                    }else {
+                        final String finalString = string;
+                        CommonHelper.parseInTime(time, new Runnable() {
+                            @Override
+                            public void run() {
+                                configInfo.listener.onSuccess(bean, finalString);
+                            }
+                        },configInfo);
+                    }*/
                 } catch (IOException e) {
                     e.printStackTrace();
-                    CommonHelper.parseErrorInTime(time,e.toString(),configInfo);
+                    onFailure(call,e);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, final Throwable t) {
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onError(t.toString());
+                    }
+                });
+            }
+        });
+
+
+
+
+
+
+
+        return call;
+    }
+
+    @Override
+    protected Call newMultiUploadRequest(final ConfigInfo configInfo) {
+       // final long time = System.currentTimeMillis();
+        Map<String, RequestBody> params = new HashMap<>();
+        List<MultipartBody.Part> parts =  new ArrayList<>();
+
+
+        if (configInfo.files != null && configInfo.files.size() >0){
+            Map<String,String> map = configInfo.files;
+            int size = map.size();
+            if (size>0){
+                Set<Map.Entry<String,String>>  set = map.entrySet();
+                for (Map.Entry<String,String> entry : set){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    File file = new File(value);
+                    RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file);
+                    MultipartBody.Part part = MultipartBody.Part.createFormData(key, file.getName(), requestBody);
+                    parts.add(part);
+
+                }
+            }
+
+        }
+
+
+        Map<String,String> map = configInfo.params;
+        int size = map.size();
+        if (size>0){
+            Set<Map.Entry<String,String>>  set = map.entrySet();
+            for (Map.Entry<String,String> entry : set){
+                String key = entry.getKey();
+                String value = entry.getValue();
+                RequestBody body =RequestBody.create(MediaType.parse("multipart/form-data"), value);
+                params.put(key,body);
+
+            }
+        }
+
+
+        Call<ResponseBody> call = service.upload(configInfo.url,params,parts);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                if (response.isSuccessful()){
+                    try {
+                        String string = response.body().string();
+                        configInfo.listener.onSuccess("",string);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        onFailure(call,e);
+                    }
+
+                }else {
+                    configInfo.listener.onError(response.code()+"");
                 }
 
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                CommonHelper.parseErrorInTime(time,t.toString(),configInfo);
+                configInfo.listener.onError(t.toString());
+
+            }
+        });
+
+
+
+
+        return call;
+    }
+
+    @Override
+    protected Call newSingleUploadRequest(final ConfigInfo configInfo) {
+        final long time = System.currentTimeMillis();
+        Map<String, RequestBody> params = new HashMap<>();
+        List<MultipartBody.Part> parts =  new ArrayList<>();
+
+
+        if (configInfo.files != null && configInfo.files.size() >0){
+            Map<String,String> map = configInfo.files;
+            int size = map.size();
+            if (size>0){
+                Set<Map.Entry<String,String>>  set = map.entrySet();
+                for (Map.Entry<String,String> entry : set){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    File file = new File(value);
+                    RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file);
+                    MultipartBody.Part part = MultipartBody.Part.createFormData(key, file.getName(), requestBody);
+                    parts.add(part);
+
+                }
+            }
+
+        }
+
+
+       Map<String,String> map = configInfo.params;
+        int size = map.size();
+        if (size>0){
+          Set<Map.Entry<String,String>>  set = map.entrySet();
+            for (Map.Entry<String,String> entry : set){
+                String key = entry.getKey();
+                String value = entry.getValue();
+                RequestBody body =RequestBody.create(MediaType.parse("multipart/form-data"), value);
+                params.put(key,body);
+
+            }
+        }
+
+
+        Call<ResponseBody> call = service.upload(configInfo.url,params,parts);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                if (response.isSuccessful()){
+                    try {
+                        String string = response.body().string();
+                        configInfo.listener.onSuccess(string,string);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        onFailure(call,e);
+                    }
+
+                }else {
+                    configInfo.listener.onError(response.code()+"");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                configInfo.listener.onError(t.toString());
+
+            }
+        });
+
+
+
+
+        return call;
+    }
+
+    @Override
+    protected Call newDownloadRequest( final ConfigInfo configInfo) {
+        final long time = System.currentTimeMillis();
+        if (serviceDownload == null){
+            initDownload();
+        }
+        Call<ResponseBody> call = serviceDownload.download(configInfo.url);
+        configInfo.listener.registEventBus();
+
+        configInfo.tag = call;
+
+        //todo 改成在子线程中执行
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+                Log.e("download","onResponse finished");
+                //开子线程将文件写到指定路径中
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        writeResponseBodyToDisk(response.body(),configInfo.filePath,configInfo.listener);
+                    }
+                }).start();
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, final Throwable t) {
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onError(t.toString());
+                    }
+                });
+            }
+        });
+        return call;
+    }
+
+    @Override
+    protected Call newCommonStringRequest(final ConfigInfo configInfo) {
+
+        Log.e("url","newCommonStringRequest:"+configInfo.url);
+
+        final long time = System.currentTimeMillis();
+        Call<ResponseBody> call;
+
+        if (configInfo.method == HttpMethod.GET){
+            call = service.executGet(configInfo.url,configInfo.params);
+        }else if (configInfo.method == HttpMethod.POST){
+            call = service.executePost(configInfo.url,configInfo.params);
+        }else {
+            call = null;
+            return call;
+        }
+
+        configInfo.tag = call;
+
+
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String string = "";
+                try {
+                    string =  response.body().string();
+                    final String finalString = string;
+                    CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                        @Override
+                        public void run() {
+                            configInfo.listener.onSuccess(finalString, finalString);
+                        }
+                    });
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                    CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                        @Override
+                        public void run() {
+                            configInfo.listener.onError(e.toString());
+                        }
+                    });
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, final Throwable t) {
+                CommonHelper.parseInTime(time, configInfo, new Runnable() {
+                    @Override
+                    public void run() {
+                        configInfo.listener.onError(t.toString());
+                    }
+                });
             }
         });
 
@@ -277,6 +583,16 @@ public class RetrofitAdapter extends NetAdapter<Call> {
 
 
 
+    }
+
+    @Override
+    public Call autoLogin() {
+        return null;
+    }
+
+    @Override
+    public <E> Call autoLogin(MyNetListener<E> myNetListener) {
+        return null;
     }
 
     @Override

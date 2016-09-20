@@ -1,11 +1,15 @@
 package com.hss01248.net.wrapper;
 
 
+import android.text.TextUtils;
+
 import com.hss01248.net.retrofit.progress.ProgressEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2016/4/15 0015.
@@ -31,8 +35,12 @@ public abstract class MyNetListener<T> {
     /** Called when response success. */
     public abstract void onSuccess(T response,String resonseStr);
 
-    public  void onSuccess(T response,String responseStr,String data,int code,String msg){
+    public  void onSuccessObj(T response,String responseStr,String data,int code,String msg){
             onSuccess(response,responseStr);
+    }
+
+    public  void onSuccessArr(List<T> response, String responseStr, String data, int code, String msg){
+       // onSuccess(response,responseStr);
     }
 
 
@@ -51,7 +59,12 @@ public abstract class MyNetListener<T> {
      * @param code
      */
     public void onCodeError(String error,String msg,int code) {
-        onError(msg);
+        if (TextUtils.isEmpty(msg)){
+            onError(code+"");
+        }else {
+            onError(msg);
+        }
+
     }
 
 

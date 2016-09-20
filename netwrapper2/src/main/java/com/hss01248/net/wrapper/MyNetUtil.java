@@ -18,28 +18,32 @@ public class MyNetUtil {
     }
 
 
-    public static void getString( String url,  Map map, String tag, MyNetListener listener) {
-       adapter.getString(url,map,tag,listener);
+    public static void getString( String url,  Map map, Class clazz, MyNetListener listener) {
+       adapter.getString(url,map,clazz,listener);
+    }
+
+    public static void postString( String url,  Map map, Class clazz, MyNetListener listener) {
+        adapter.postString(url,map,clazz,listener);
     }
 
 
-    public static void postStandardJsonResonse( String url,  Map map, String tag, MyNetListener listener) {
-        adapter.postStandardJsonResonse(url,map,tag,listener);
+    public static void postStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
+        adapter.postStandardJsonResonse(url,map,clazz,listener);
     }
 
 
-    public static void getStandardJsonResonse( String url,  Map map, String tag, MyNetListener listener) {
-        adapter.getStandardJsonResonse(url,map,tag,listener);
+    public static void getStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
+        adapter.getStandardJsonResonse(url,map,clazz,listener);
     }
 
 
-    public static void postCommonJsonResonse( String url,  Map map, String tag, MyNetListener listener) {
-        adapter.postCommonJsonResonse(url,map,tag,listener);
+    public static void postCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
+        adapter.postCommonJsonResonse(url,map,clazz,listener);
     }
 
 
-    public static void getCommonJsonResonse( String url,  Map map, String tag, MyNetListener listener) {
-        adapter.getCommonJsonResonse(url,map,tag,listener);
+    public static void getCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
+        adapter.getCommonJsonResonse(url,map,clazz,listener);
     }
 
 
@@ -53,12 +57,16 @@ public class MyNetUtil {
     }
 
 
-    public static void cancleRequest(Object tag) {
-        adapter.cancleRequest(tag);
+    public static void cancleRequest(Object clazz) {
+        adapter.cancleRequest(clazz);
     }
 
 
     public static void download(String url, String savedpath, MyNetListener callback) {
         adapter.download(url,savedpath,callback);
+    }
+
+    public static void upLoad(String url, Map<String,String> params,Map<String,String> files, MyNetListener callback){
+        adapter.upLoad(url,params,files,callback);
     }
 }

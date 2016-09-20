@@ -41,6 +41,8 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 
     compile 'org.greenrobot:eventbus:3.0.0'
+    //compile 'com.alibaba:fastjson:1.1.54.android'
+    compile 'com.alibaba:fastjson:1.2.17'
 
    // compile 'com.github.glassLake:MyVolleyPlus:1.0.1'
 

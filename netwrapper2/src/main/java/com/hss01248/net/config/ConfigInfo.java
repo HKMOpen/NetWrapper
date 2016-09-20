@@ -16,6 +16,9 @@ public class ConfigInfo<T> {
     public Map<String,String> params ;
     public int type = TYPE_STRING;//请求的类型,6类中的一种
 
+    public boolean isJsonArray = false;
+    public Class<T> clazz;
+
     //是否拼接token
     public boolean isAppendToken = true;
 
@@ -59,6 +62,9 @@ public class ConfigInfo<T> {
 
     //下載文件的保存路徑
     public String filePath;
+
+    //上传的文件路径
+    public Map<String, String> files;
 
     /*//最終的數據類型:普通string,普通json,規範的jsonobj
 

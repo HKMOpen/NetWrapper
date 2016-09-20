@@ -2,15 +2,23 @@ package com.hss01248.net.retrofit;
 
 
 import com.hss01248.net.config.BaseNetBean;
+import com.hss01248.net.config.ConfigInfo;
 
+import java.util.List;
 import java.util.Map;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 import retrofit2.http.QueryMap;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
@@ -43,6 +51,41 @@ public interface  ApiService {
     Call<ResponseBody> download(@Url String fileUrl);
 
 
+    @Multipart
+    @POST()
+    Call<ResponseBody> upload(@Url String url,@PartMap Map<String,RequestBody> params,@Part() List<MultipartBody.Part> parts);
+
+
+    /**
+     * 如下的泛型是无法使用的:
+     *      Method return type must not include a type variable or wildcard: retrofit2.Call<T>
+     *
+     *     JakeWharton:You cannot. Type information needs to be fully known at runtime in order for deserialization to work.
+     *     https://github.com/square/retrofit/issues/2012
+     */
+//
+    //
+
+    /**
+     * 通过 List<MultipartBody.Part> 传入多个part实现多文件上传
+     * @param parts 每个part代表一个
+     * @return 状态信息
+     */
+    @Multipart
+    @POST("users/image")
+    Call<ResponseBody> uploadFilesWithParts(@Part() List<MultipartBody.Part> parts);
+
+
+    /**
+     * 通过 MultipartBody和@body作为参数来上传
+     * @param multipartBody MultipartBody包含多个Part
+     * @return 状态信息
+     */
+    @POST("users/image")
+    Call<ResponseBody> uploadFileWithRequestBody(@Body MultipartBody multipartBody);
+
+
+
     /**
      * 标准格式的json(data,msg,code)解析:泛型嵌套
      * */
@@ -60,10 +103,10 @@ public interface  ApiService {
      * */
     @FormUrlEncoded
     @POST()
-    <T>  Call<T> postCommonJson(@Url String url, @FieldMap Map<String, String> maps);
+    <T>  Call<T> postCommonJson(@Url String url, @FieldMap Map<String, String> maps, ConfigInfo<T> info);
 
     @GET()
-    <T>  Call<T> getCommonJson(@Url String url, @QueryMap Map<String, String> maps);
+    <T>  Call<T> getCommonJson(@Url String url, @QueryMap Map<String, String> maps, ConfigInfo<T> info);
 
 
 

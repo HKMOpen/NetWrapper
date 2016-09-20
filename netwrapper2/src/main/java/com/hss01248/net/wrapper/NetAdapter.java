@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public abstract class NetAdapter<T> implements Netable<T>{
 
-    private static final String TAG = "NetAdapter";
+    private static final String clazz = "NetAdapter";
     public  Context context;
 
     public void initInApp(Context context){
@@ -73,8 +73,9 @@ public abstract class NetAdapter<T> implements Netable<T>{
                 return newSingleUploadRequest(configInfo);
             case ConfigInfo.TYPE_UPLOAD_MULTIPLE:
                 return newMultiUploadRequest(configInfo);
+            default:return null;
         }
-        return null;
+
     }
 
     protected abstract <E> T newStandardJsonRequest(ConfigInfo<E> configInfo);
@@ -115,77 +116,77 @@ public abstract class NetAdapter<T> implements Netable<T>{
     }*/
 
 
-    public abstract void cancleRequest(Object tag);
+    public abstract void cancleRequest(Object clazz);
 
    /* @Override
-    public <E> T getString(String url, Map map, String tag, MyNetListener<E> listener) {
+    public <E> T getString(String url, Map map, String clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,map,tag,listener);
-        info.tag = tag;
+        setKeyInfo(info,url,map,clazz,listener);
+        info.clazz = clazz;
 
         return assembleRequest(info);
     }*/
    @Override
-   public <E> T getString( String url, Map map, String tag, final MyNetListener<E> listener){
+   public <E> T getString( String url, Map map, Class<E> clazz, final MyNetListener<E> listener){
 
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,map,tag,listener);
-        info.tag = tag;
+        setKeyInfo(info,url,map,clazz,listener);
+        info.clazz = clazz;
 
        return assembleRequest(info);
     }
 
     @Override
-    public <E> T postString(String url, Map map, String tag, MyNetListener<E> listener) {
+    public <E> T postString(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,map,tag,listener);
-        info.tag = tag;
+        setKeyInfo(info,url,map,clazz,listener);
+        info.clazz = clazz;
         info.method = HttpMethod.POST;
 
         return assembleRequest(info);
     }
 
     @Override
-    public <E> T postStandardJsonResonse( String url,  Map map, String tag, final MyNetListener<E> listener){
+    public <E> T postStandardJsonResonse( String url,  Map map, Class<E> clazz, final MyNetListener<E> listener){
 
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,map,tag,listener);
+        setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON_FORMATTED;
         info.method = HttpMethod.POST;
         return assembleRequest(info);
     }
     @Override
-    public <E> T getStandardJsonResonse(String url, Map map, String tag, final MyNetListener<E> listener){
+    public <E> T getStandardJsonResonse(String url, Map map, Class<E> clazz, final MyNetListener<E> listener){
         ConfigInfo<E> info = new ConfigInfo<E>();
-        setKeyInfo(info,url,map,tag,listener);
+        setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON_FORMATTED;
         return assembleRequest(info);
     }
 
 
     @Override
-    public <E> T postCommonJsonResonse( String url,  Map map, String tag, final MyNetListener<E> listener){
+    public <E> T postCommonJsonResonse( String url,  Map map, Class<E> clazz, final MyNetListener<E> listener){
 
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,map,tag,listener);
+        setKeyInfo(info,url,map,clazz,listener);
         info.method = HttpMethod.POST;
-        info.tag = tag;
+        info.clazz = clazz;
         info.type = ConfigInfo.TYPE_JSON;
 
         return assembleRequest(info);
     }
 
-    protected  <E> void setKeyInfo(ConfigInfo<E> info, String url, Map map, String tag, MyNetListener<E> listener){
+    protected  <E> void setKeyInfo(ConfigInfo<E> info, String url, Map map, Class<E> clazz, MyNetListener<E> listener){
         info.url = url;
         info.params = map;
-        info.tag = tag;
+        info.clazz = clazz;
         info.listener = listener;
     }
 
     @Override
-    public <E> T getCommonJsonResonse( String url,  Map map, String tag, final MyNetListener<E> listener){
+    public <E> T getCommonJsonResonse( String url,  Map map, Class<E> clazz, final MyNetListener<E> listener){
         ConfigInfo<E> info = new ConfigInfo<E>();
-        setKeyInfo(info,url,map,tag,listener);
+        setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON;
         return assembleRequest(info);
     }
@@ -194,7 +195,7 @@ public abstract class NetAdapter<T> implements Netable<T>{
     @Override
     public <E> T download(String url,String savedpath,MyNetListener<E> listener){
         ConfigInfo<E> info = new ConfigInfo();
-        setKeyInfo(info,url,new HashMap(),"",listener);
+        setKeyInfo(info,url,new HashMap(),null,listener);
         info.isAppendToken = false;
         info.type = ConfigInfo.TYPE_DOWNLOAD;
         info.filePath = savedpath;
@@ -203,5 +204,19 @@ public abstract class NetAdapter<T> implements Netable<T>{
 
     }
 
+    @Override
+    public <E> void resend(ConfigInfo<E> configInfo) {
+            assembleRequest(configInfo);
+    }
 
+    @Override
+    public <E> T upLoad(String url, Map<String, String> params, Map<String, String> files, MyNetListener<E> callback) {
+        ConfigInfo<E> info = new ConfigInfo();
+        setKeyInfo(info,url,params,null,callback);
+        info.files = files;
+        info.isAppendToken = false;
+        info.type = ConfigInfo.TYPE_UPLOAD_MULTIPLE;
+        info.timeout = 0;
+        return assembleRequest(info);
+    }
 }
