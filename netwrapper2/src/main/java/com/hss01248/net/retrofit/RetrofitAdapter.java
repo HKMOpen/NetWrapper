@@ -319,6 +319,8 @@ public class RetrofitAdapter extends NetAdapter<Call> {
             initUpload();
         }
 
+        configInfo.listener.registEventBus();
+
 
         Map<String, RequestBody> params = new HashMap<>();
         List<MultipartBody.Part> parts =  new ArrayList<>();

@@ -90,6 +90,10 @@ public abstract class MyNetListener<T> {
     public void onProgressChange(long fileSize, long downloadedSize) {
     }
 
+    public void onFinish(){
+
+    }
+
 
     /**
      * 只需要在retrofit下载时调用
@@ -109,6 +113,7 @@ public abstract class MyNetListener<T> {
 
             if (event.done){
                 unRegistEventBus();
+                onFinish();
             }
         }
 
