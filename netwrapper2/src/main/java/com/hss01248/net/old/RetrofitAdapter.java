@@ -1,4 +1,4 @@
-package com.hss01248.net.retrofit;
+package com.hss01248.net.old;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -7,12 +7,10 @@ import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
 import com.hss01248.net.config.NetDefaultConfig;
+import com.hss01248.net.retrofit.ApiService;
 import com.hss01248.net.retrofit.progress.ProgressInterceptor;
 import com.hss01248.net.retrofit.progress.UploadFileRequestBody;
-import com.hss01248.net.wrapper.CommonHelper;
 import com.hss01248.net.wrapper.MyNetListener;
-import com.hss01248.net.wrapper.MyNetUtil;
-import com.hss01248.net.wrapper.NetAdapter;
 import com.litesuits.android.async.SimpleTask;
 
 import java.io.File;
@@ -178,7 +176,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
             call = null;
             return call;
         }
-        configInfo.tag = call;
+        configInfo.tagForCancle = call;
 
         call.enqueue(new Callback<E>() {
             @Override
@@ -212,7 +210,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
             return call;
         }
 
-        configInfo.tag = call;
+        configInfo.tagForCancle = call;
 
 
 
@@ -276,7 +274,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                    *//* Gson gson = new Gson();
                     Type objectType = new TypeToken<E>() {}.getType();
                     final E bean = gson.fromJson(string,objectType);
-                    Log.e("tag",bean+"");
+                    Log.e("tagForCancle",bean+"");
                     if (bean == null){
                         onFailure(call,new JSONException("json parse error"));
                     }else {
@@ -515,7 +513,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
         Call<ResponseBody> call = serviceDownload.download(configInfo.url);
         configInfo.listener.registEventBus();
 
-        configInfo.tag = call;
+        configInfo.tagForCancle = call;
 
         //todo 改成在子线程中执行
 
@@ -631,7 +629,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
             call = null;
             return call;
         }
-        configInfo.tag = call;
+        configInfo.tagForCancle = call;
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override

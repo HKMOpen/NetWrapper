@@ -102,12 +102,12 @@ public class VolleyAdapter {
 
     @Override
     protected void setInfoToRequest(ConfigInfo configInfo, Request request) {
-        request.setTag(configInfo.tag);
+        request.setTag(configInfo.tagForCancle);
 
     }
 
     @Override
-    public void cancleRequest(Object tag) {
-        requestQueue.cancelAll(tag);
+    public void cancleRequest(Object tagForCancle) {
+        requestQueue.cancelAll(tagForCancle);
     }*/
 }

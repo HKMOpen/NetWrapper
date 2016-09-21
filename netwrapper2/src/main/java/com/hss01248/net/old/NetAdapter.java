@@ -1,4 +1,4 @@
-package com.hss01248.net.wrapper;
+package com.hss01248.net.old;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
+import com.hss01248.net.wrapper.MyNetListener;
 import com.litesuits.android.async.SimpleTask;
 
 import java.util.HashMap;
@@ -105,8 +106,8 @@ public abstract class NetAdapter<T> implements Netable<T>{
 
 
             case ConfigInfo.TYPE_DOWNLOAD:
-            case ConfigInfo.TYPE_UPLOAD_SINGLE:
-            case ConfigInfo.TYPE_UPLOAD_MULTIPLE:
+            case ConfigInfo.TYPE_UPLOAD_WITH_PROGRESS:
+            case ConfigInfo.TYPE_UPLOAD_NONE_PROGRESS:
                 return false;
             default:return false;
         }
@@ -129,9 +130,9 @@ public abstract class NetAdapter<T> implements Netable<T>{
                 return newStandardJsonRequest(configInfo);
             case ConfigInfo.TYPE_DOWNLOAD:
                 return newDownloadRequest(configInfo);
-            case ConfigInfo.TYPE_UPLOAD_SINGLE:
+            case ConfigInfo.TYPE_UPLOAD_WITH_PROGRESS:
                 return newSingleUploadRequest(configInfo);
-            case ConfigInfo.TYPE_UPLOAD_MULTIPLE:
+            case ConfigInfo.TYPE_UPLOAD_NONE_PROGRESS:
                 return newMultiUploadRequest(configInfo);
             default:return null;
         }
@@ -230,7 +231,6 @@ public abstract class NetAdapter<T> implements Netable<T>{
         ConfigInfo<E> info = new ConfigInfo();
         setKeyInfo(info,url,map,clazz,listener);
         info.method = HttpMethod.POST;
-        info.clazz = clazz;
         info.type = ConfigInfo.TYPE_JSON;
 
         return assembleRequest(info);
@@ -261,7 +261,6 @@ public abstract class NetAdapter<T> implements Netable<T>{
         info.filePath = savedpath;
         info.timeout = 0;
         return  assembleRequest(info);
-
     }
 
     @Override
@@ -275,7 +274,7 @@ public abstract class NetAdapter<T> implements Netable<T>{
         setKeyInfo(info,url,params,null,callback);
         info.files = files;
         info.isAppendToken = false;
-        info.type = ConfigInfo.TYPE_UPLOAD_SINGLE;
+        info.type = ConfigInfo.TYPE_UPLOAD_WITH_PROGRESS;
         info.timeout = 0;
         return assembleRequest(info);
     }

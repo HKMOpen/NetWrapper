@@ -1,4 +1,4 @@
-package com.hss01248.net.wrapper;
+package com.hss01248.net.old;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -8,6 +8,9 @@ import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.NetDefaultConfig;
+import com.hss01248.net.wrapper.MyJson;
+import com.hss01248.net.wrapper.MyNetListener;
+import com.hss01248.net.wrapper.TimerUtil;
 import com.litesuits.android.async.SimpleTask;
 
 import org.json.JSONException;

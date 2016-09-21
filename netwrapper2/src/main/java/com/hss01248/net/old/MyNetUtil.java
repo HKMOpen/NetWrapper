@@ -1,6 +1,8 @@
-package com.hss01248.net.wrapper;
+package com.hss01248.net.old;
 
 import android.content.Context;
+
+import com.hss01248.net.wrapper.MyNetListener;
 
 import java.util.Map;
 

@@ -78,7 +78,7 @@ public class VolleyJsonAdapter  {
     }
 
     private void setInfoToRequest(final ConfigInfo configInfo, final MyStandardJsonRequest request) {
-        request.setTag(configInfo.tag);
+        request.setTag(configInfo.tagForCancle);
         request.setRetryPolicy(new RetryPolicy() {
             @Override
             public int getCurrentTimeout() {
