@@ -8,7 +8,7 @@ import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
 import com.hss01248.net.config.NetDefaultConfig;
 import com.hss01248.net.retrofit.progress.ProgressInterceptor;
-import com.hss01248.net.retrofit.progress.ProgressRequstInterceptor;
+import com.hss01248.net.retrofit.progress.UploadFileRequestBody;
 import com.hss01248.net.wrapper.CommonHelper;
 import com.hss01248.net.wrapper.MyNetListener;
 import com.hss01248.net.wrapper.MyNetUtil;
@@ -20,9 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +88,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
         OkHttpClient.Builder httpBuilder=new OkHttpClient.Builder();
         OkHttpClient client=httpBuilder.readTimeout(0, TimeUnit.SECONDS)
                 .connectTimeout(30, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
-                .retryOnConnectionFailure(true)//重试
+                .retryOnConnectionFailure(false)//重试
                 .addInterceptor(new ProgressInterceptor())//下载时更新进度
                 .build();
 
@@ -107,9 +105,15 @@ public class RetrofitAdapter extends NetAdapter<Call> {
     private void initUpload() {
         OkHttpClient.Builder httpBuilder=new OkHttpClient.Builder();
         OkHttpClient client=httpBuilder.readTimeout(0, TimeUnit.SECONDS)
-                .connectTimeout(30, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
-                .retryOnConnectionFailure(true)//重试
-                .addInterceptor(new ProgressRequstInterceptor())//上传时更新进度
+                .connectTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
+                .retryOnConnectionFailure(false)//重试
+               // .addInterceptor(new ProgressRequestInterceptor())//上传时更新进度
+               /* .addNetworkInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(Chain chain) throws IOException {
+                        return null;
+                    }
+                })*/
                 .build();
 
         retrofitUpload = new Retrofit
@@ -118,7 +122,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                 .client(client)
                 .build();
 
-        serviceUpload = retrofitDownload.create(ApiService.class);
+        serviceUpload = retrofitUpload.create(ApiService.class);
     }
 
     public static  RetrofitAdapter getInstance(){
@@ -311,6 +315,12 @@ public class RetrofitAdapter extends NetAdapter<Call> {
         return call;
     }*/
 
+
+    /**
+     * 不带进度条的写法
+     * @param configInfo
+     * @return
+     */
     @Override
     protected Call newMultiUploadRequest(final ConfigInfo configInfo) {
        // final long time = System.currentTimeMillis();
@@ -322,7 +332,7 @@ public class RetrofitAdapter extends NetAdapter<Call> {
         configInfo.listener.registEventBus();
 
 
-        Map<String, RequestBody> params = new HashMap<>();
+      /*  Map<String, RequestBody> params = new HashMap<>();
         List<MultipartBody.Part> parts =  new ArrayList<>();
 
 
@@ -335,15 +345,19 @@ public class RetrofitAdapter extends NetAdapter<Call> {
                     String key = entry.getKey();
                     String value = entry.getValue();
                     File file = new File(value);
-                    RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), file);//todo 拿到文件的mimetype
+                    String type = getMimeType(value);
+                    Log.e("type","mimetype:"+type);
+                    RequestBody requestBody = RequestBody.create(MediaType.parse(type), file);//todo  image/jpeg 拿到文件的mimetype application/vnd.android.package-archive
                     MultipartBody.Part part = MultipartBody.Part.createFormData(key, file.getName(), requestBody);
                     parts.add(part);
                 }
             }
 
-        }
+        }*/
 
+        MultipartBody.Builder builder = new MultipartBody.Builder();
 
+        //添加普通参数:
         Map<String,String> map = configInfo.params;
         int size = map.size();
         if (size>0){
@@ -351,14 +365,36 @@ public class RetrofitAdapter extends NetAdapter<Call> {
             for (Map.Entry<String,String> entry : set){
                 String key = entry.getKey();
                 String value = entry.getValue();
-                RequestBody body =RequestBody.create(MediaType.parse("multipart/form-data"), value);
-                params.put(key,body);
+                builder.addFormDataPart(key,value);
 
             }
         }
 
+        //添加文件
 
-        Call<ResponseBody> call = service.upload(configInfo.url,params,parts);
+        if (configInfo.files != null && configInfo.files.size() >0){
+            Map<String,String> files = configInfo.files;
+            int count = files.size();
+            if (count>0){
+                Set<Map.Entry<String,String>>  set = files.entrySet();
+                for (Map.Entry<String,String> entry : set){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    File file = new File(value);
+                    String type = CommonHelper.getMimeType(file);
+                    Log.e("type","mimetype:"+type);
+                    RequestBody requestBody = RequestBody.create(MediaType.parse(type), file);
+                    //todo  image/jpeg 拿到文件的mimetype application/vnd.android.package-archive
+                  builder.addFormDataPart(key,file.getName(),requestBody);
+                }
+            }
+
+        }
+
+        builder.setType(MultipartBody.FORM);
+        MultipartBody multipartBody = builder.build();
+
+        Call<ResponseBody> call = service.upload(configInfo.url,multipartBody);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -391,10 +427,83 @@ public class RetrofitAdapter extends NetAdapter<Call> {
         return call;
     }
 
+    /**
+     * 带进度条的写法
+     * @param configInfo
+     * @return
+     */
     @Override
     protected Call newSingleUploadRequest(final ConfigInfo configInfo) {
 
-        return newMultiUploadRequest(configInfo);
+        if (serviceUpload == null){
+            initUpload();
+        }
+        configInfo.listener.registEventBus();
+
+
+        Map<String, RequestBody> requestBodyMap = new HashMap<>();
+/* UploadFileRequestBody fileRequestBody = new UploadFileRequestBody(file, new DefaultProgressListener(mHandler,1));
+        requestBodyMap.put("file\"; filename=\"" + file.getName(), fileRequestBody);
+*/
+
+        //添加文件
+
+        if (configInfo.files != null && configInfo.files.size() >0){
+            Map<String,String> files = configInfo.files;
+            int count = files.size();
+            if (count>0){
+                Set<Map.Entry<String,String>>  set = files.entrySet();
+                for (Map.Entry<String,String> entry : set){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    File file = new File(value);
+                    String type = CommonHelper.getMimeType(file);
+                    Log.e("type","mimetype:"+type);
+
+                    UploadFileRequestBody fileRequestBody = new UploadFileRequestBody(file, type,configInfo.url);
+                    requestBodyMap.put(key+"\"; filename=\"" + file.getName(), fileRequestBody);
+
+                   // requestBodyMap.put(key, fileRequestBody);
+
+                }
+            }
+
+        }
+
+
+
+        Call<ResponseBody> call = service.uploadWithProgress(configInfo.url,configInfo.params,requestBodyMap);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                if (response.isSuccessful()){
+                    try {
+                        String string = response.body().string();
+                        configInfo.listener.onSuccess(string,string);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        onFailure(call,e);
+                    }
+
+                }else {
+                    configInfo.listener.onError(response.code()+"");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                configInfo.listener.onError(t.toString());
+
+            }
+        });
+
+
+
+
+        return call;
+
     }
 
     @Override

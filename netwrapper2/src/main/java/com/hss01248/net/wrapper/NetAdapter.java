@@ -275,7 +275,7 @@ public abstract class NetAdapter<T> implements Netable<T>{
         setKeyInfo(info,url,params,null,callback);
         info.files = files;
         info.isAppendToken = false;
-        info.type = ConfigInfo.TYPE_UPLOAD_MULTIPLE;
+        info.type = ConfigInfo.TYPE_UPLOAD_SINGLE;
         info.timeout = 0;
         return assembleRequest(info);
     }

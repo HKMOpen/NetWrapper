@@ -1,6 +1,8 @@
 package com.hss01248.net.retrofit.progress;
 
 
+import com.hss01248.net.config.NetDefaultConfig;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
@@ -62,10 +64,12 @@ public class ProgressResponseBody extends ResponseBody {
                // progressListener.onProgress(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
                 timeNow = System.currentTimeMillis();
 
-                if (timeNow - timePre > 300){//至少300ms才更新一次状态
-                    EventBus.getDefault().post(new ProgressEvent(totalBytesRead,responseBody.contentLength(), bytesRead == -1,url));
-                   // ProgressResponseBody.this.onProgress(totalBytesRead,responseBody.contentLength(), bytesRead == -1,url);
+                if (timeNow - timePre > NetDefaultConfig.PROGRESS_INTERMEDIATE || totalBytesRead == responseBody.contentLength()){//至少300ms才更新一次状态
                     timePre = timeNow;
+                    EventBus.getDefault().post(new ProgressEvent(totalBytesRead,responseBody.contentLength(),
+                            totalBytesRead == responseBody.contentLength(),url));
+                   // ProgressResponseBody.this.onProgress(totalBytesRead,responseBody.contentLength(), bytesRead == -1,url);
+
                 }
 
 

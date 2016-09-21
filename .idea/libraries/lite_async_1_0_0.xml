@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="lite-async-1.0.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/lite-async-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/netwrapper2/libs/lite-async-1.0.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

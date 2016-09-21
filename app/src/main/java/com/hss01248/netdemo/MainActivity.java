@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
                 break;
             case R.id.download:
                 File dir = Environment.getExternalStorageDirectory();
-                File file = new File(dir,"qxinli.apk");
+                final File file = new File(dir,"qxinli.apk");
                 if (file.exists()){
                     try {
                         file.createNewFile();
@@ -172,7 +172,7 @@ public class MainActivity extends Activity {
 
 
                 Map<String,String> map7 = new HashMap<>();
-                map7.put("uploadFile","/storage/emulated/0/DCIM/1474363536041.jpg");
+                map7.put("uploadFile","/storage/emulated/0/app-debug.apk");///storage/emulated/0/DCIM/1474363536041.jpg  /storage/emulated/0/apkpure_downcc.apk  application/vnd.android.package-archive
 
                 MyNetUtil.upLoad("http://192.168.1.100:8080/gm/file/q_uploadAndroidApk.do",
                         map6,map7, new MyNetListener<String>() {
@@ -185,6 +185,12 @@ public class MainActivity extends Activity {
                             public void onError(String error) {
                                 super.onError(error);
                                 Logger.e("error:"+error);
+                            }
+
+                            @Override
+                            public void onProgressChange(long fileSize, long downloadedSize) {
+                                super.onProgressChange(fileSize, downloadedSize);
+                                Logger.e("upload onProgressChange:"+downloadedSize + "  total:"+ fileSize +"  progress:"+downloadedSize*100/fileSize);
                             }
                         });
                 break;

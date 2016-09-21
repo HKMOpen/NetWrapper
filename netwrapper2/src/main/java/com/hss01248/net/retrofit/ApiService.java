@@ -57,6 +57,30 @@ public interface  ApiService {
 
 
     /**
+     * 无法实现进度回调
+     * @param url
+     * @param multipartBody
+     * @return
+     */
+    @POST()
+    Call<ResponseBody> upload(@Url String url,@Body MultipartBody multipartBody);
+
+
+    /**
+     * 可以有进度回调
+     * @param url
+     * @param options
+     * @param externalFileParameters
+     * @return
+     */
+    @POST()
+    @Multipart
+    Call<ResponseBody> uploadWithProgress(@Url String url,@QueryMap Map<String, String> options,
+                                            @PartMap Map<String, RequestBody> externalFileParameters) ;
+
+
+
+    /**
      * 如下的泛型是无法使用的:
      *      Method return type must not include a type variable or wildcard: retrofit2.Call<T>
      *
@@ -87,7 +111,7 @@ public interface  ApiService {
 
 
     /**
-     * 标准格式的json(data,msg,code)解析:泛型嵌套
+     * 标准格式的json(data,msg,code)解析:泛型嵌套 无法实现: retrofit不支持二次泛型
      * */
     @FormUrlEncoded
     @POST()

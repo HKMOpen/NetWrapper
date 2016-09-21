@@ -19,6 +19,8 @@ public class NetDefaultConfig {
 
     public static final String TOKEN = "session_id";//todo
 
+    public static long PROGRESS_INTERMEDIATE = 100;//进度条更新间隔,默认100ms
+
 
     public  static  String KEY_DATA = "data";
     public static  String KEY_CODE = "code";
