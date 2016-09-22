@@ -43,7 +43,6 @@ public class RetrofitClient extends BaseNet<Call> {
     //需要单独为下载的call设置Retrofit: 主要是超时时间设置为0
     Retrofit retrofitDownload;
 
-
     //上传的client
     ApiService serviceUpload;
     Retrofit retrofitUpload;

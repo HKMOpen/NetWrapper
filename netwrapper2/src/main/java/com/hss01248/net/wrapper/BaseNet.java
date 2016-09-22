@@ -5,6 +5,8 @@ import android.text.TextUtils;
 import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
+import com.hss01248.net.interfaces.ILoginManager;
+import com.hss01248.net.interfaces.INet;
 import com.hss01248.net.old.CommonHelper;
 import com.hss01248.net.old.MyNetUtil;
 import com.litesuits.android.async.SimpleTask;
@@ -16,6 +18,12 @@ import java.util.Map;
  * Created by Administrator on 2016/9/21.
  */
 public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是Request
+
+    private ILoginManager loginManager;
+
+    public void setLoginManager(ILoginManager loginManager){
+        this.loginManager = loginManager;
+    }
 
     protected  <E> void setKeyInfo(ConfigInfo<E> info, String url, Map map, Class<E> clazz, MyNetListener<E> listener){
         info.url = url;
@@ -88,12 +96,27 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
 
     @Override
     public <E> ConfigInfo<E> autoLogin() {
+        if (loginManager != null){
+          return   loginManager.autoLogin();
+        }
         return null;
     }
 
     @Override
     public <E> ConfigInfo<E> autoLogin(MyNetListener<E> myNetListener) {
+        if (loginManager != null){
+            return   loginManager.autoLogin(myNetListener);
+        }
         return null;
+
+    }
+
+    @Override
+    public boolean isLogin() {
+        if (loginManager != null){
+            return loginManager.isLogin();
+        }
+        return false;
     }
 
     @Override
@@ -233,10 +256,6 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
                 }
 
             }
-
-
-
-
 
             case ConfigInfo.TYPE_DOWNLOAD:
             case ConfigInfo.TYPE_UPLOAD_WITH_PROGRESS:

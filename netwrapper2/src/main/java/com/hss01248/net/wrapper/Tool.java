@@ -137,9 +137,13 @@ public class Tool {
                 return;
             }
 
-            final String dataStr = object.optString(NetDefaultConfig.KEY_DATA);
-            final int code = object.optInt(NetDefaultConfig.KEY_CODE);
-            final String msg = object.optString(NetDefaultConfig.KEY_MSG);
+            String key_data = TextUtils.isEmpty(configInfo.key_data) ? NetDefaultConfig.KEY_DATA : configInfo.key_data;
+            String key_code = TextUtils.isEmpty(configInfo.key_code) ? NetDefaultConfig.KEY_CODE : configInfo.key_code;
+            String key_msg = TextUtils.isEmpty(configInfo.key_msg) ? NetDefaultConfig.KEY_MSG : configInfo.key_msg;
+
+            final String dataStr = object.optString(key_data);
+            final int code = object.optInt(key_code);
+            final String msg = object.optString(key_msg);
 
             final String finalString1 = string;
 
@@ -162,60 +166,61 @@ public class Tool {
      * 解析标准json的方法
 
      * @param configInfo
-     * @param adapter
+
      * @param <E>
      */
-    private static <E> void parseStandardJsonObj(String response,String data,int code,String msg, final ConfigInfo<E> configInfo
-                                                 ){
+    private static <E> void parseStandardJsonObj(String response,String data,int code,String msg, final ConfigInfo<E> configInfo){
 
-        switch (code){
-            case BaseNetBean.CODE_SUCCESS://请求成功
+        int codeSuccess = configInfo.isCustomCodeSet ? configInfo.code_success : BaseNetBean.CODE_SUCCESS;
+        int codeUnFound = configInfo.isCustomCodeSet ? configInfo.code_unFound : BaseNetBean.CODE_UN_FOUND;
+        int codeUnlogin = configInfo.isCustomCodeSet ? configInfo.code_unlogin : BaseNetBean.CODE_UNLOGIN;
 
-                if (isJsonEmpty(data)){
-                    configInfo.listener.onEmpty();
-                }else {
-                    try{
-
-                        if (data.startsWith("{")){
-                            E bean =  MyJson.parseObject(data,configInfo.clazz);
-                            configInfo.listener.onSuccessObj(bean ,response,data,code,msg);
-                            cacheResponse(response, configInfo);
-                        }else if (data.startsWith("[")){
-                            List<E> beans =  MyJson.parseArray(data,configInfo.clazz);
-                            configInfo.listener.onSuccessArr(beans,response,data,code,msg);
-                            cacheResponse(response, configInfo);
+        if (code == codeSuccess){
+            if (isJsonEmpty(data)){
+                configInfo.listener.onEmpty();
+            }else {
+                try{
+                    if (data.startsWith("{")){
+                        E bean =  MyJson.parseObject(data,configInfo.clazz);
+                        configInfo.listener.onSuccessObj(bean ,response,data,code,msg);
+                        cacheResponse(response, configInfo);
+                    }else if (data.startsWith("[")){
+                        List<E> beans =  MyJson.parseArray(data,configInfo.clazz);
+                        configInfo.listener.onSuccessArr(beans,response,data,code,msg);
+                        cacheResponse(response, configInfo);
+                    }else {//如果data的值是一个字符串,而不是标准json,那么直接返回
+                        if (String.class.equals(configInfo.clazz) ){//此时,E也是String类型.如果有误,会抛出到下面catch里
+                            configInfo.listener.onSuccess((E) data,data);
+                        }else {
+                             configInfo.listener.onError("不是标准的json数据");
                         }
-
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        configInfo.listener.onError(e.toString());
-                        return;
                     }
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                    configInfo.listener.onError(e.toString());
+                    return;
+                }
+            }
+        }else if (code == codeUnFound){
+            configInfo.listener.onUnFound();
+        }else if (code == codeUnlogin){
+            configInfo.client.autoLogin(new MyNetListener() {
+                @Override
+                public void onSuccess(Object response, String resonseStr) {
+                    configInfo.client.resend(configInfo);
                 }
 
-                break;
-            case BaseNetBean.CODE_UN_FOUND://没有找到内容
-                configInfo.listener.onUnFound();
-                break;
-            case BaseNetBean.CODE_UNLOGIN://未登录
-                configInfo.client.autoLogin(new MyNetListener() {
-                    @Override
-                    public void onSuccess(Object response, String resonseStr) {
-                        configInfo.client.resend(configInfo);
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        super.onError(error);
-                        configInfo.listener.onUnlogin();
-                    }
-                });
-                break;
-
-            default:
-                configInfo.listener.onCodeError("",msg,code);
-                break;
+                @Override
+                public void onError(String error) {
+                    super.onError(error);
+                    configInfo.listener.onUnlogin();
+                }
+            });
+        }else {
+            configInfo.listener.onCodeError("",msg,code);
         }
+
     }
 
 

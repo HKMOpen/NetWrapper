@@ -10,9 +10,9 @@ public class BaseNetBean<T> {
 
     //TODO
     public static final int CODE_NONE = -1;
-    public static final int CODE_SUCCESS = 0;
-    public static final int CODE_UNLOGIN = 2;
-    public static final int CODE_UN_FOUND = 3;
+    public static  int CODE_SUCCESS = 0;
+    public static  int CODE_UNLOGIN = 2;
+    public static  int CODE_UN_FOUND = 3;
 
 
     /*public class Result<T> {
