@@ -21,8 +21,6 @@ import okio.Sink;
 public class UploadFileRequestBody extends RequestBody {
 
     private RequestBody mRequestBody;
-    // private ProgressListener mProgressListener;
-
     private BufferedSink bufferedSink;
     private String url;
 
@@ -31,15 +29,8 @@ public class UploadFileRequestBody extends RequestBody {
        // this.mRequestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         this.mRequestBody = RequestBody.create(MediaType.parse(mimeType), file);
         this.url = url;
-        // this.mProgressListener = progressListener ;
     }
 
-    public UploadFileRequestBody(RequestBody requestBody) {
-        this.mRequestBody = requestBody;
-        // this.mProgressListener = progressListener;
-    }
-
-    //返回了requestBody的类型，想什么form-data/MP3/MP4/png等等等格式
     @Override
     public MediaType contentType() {
         return mRequestBody.contentType();
@@ -71,7 +62,6 @@ public class UploadFileRequestBody extends RequestBody {
             long bytesWritten = 0L;
             //总字节长度，避免多次调用contentLength()方法
             long contentLength = 0L;
-
             @Override
             public void write(Buffer source, long byteCount) throws IOException {
                 super.write(source, byteCount);
@@ -81,17 +71,12 @@ public class UploadFileRequestBody extends RequestBody {
                 }
                 //增加当前写入的字节数
                 bytesWritten += byteCount;
-                //回调上传接口
-                // mProgressListener.onProgress(bytesWritten, contentLength, bytesWritten == contentLength);
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - oldTime > NetDefaultConfig.PROGRESS_INTERMEDIATE || bytesWritten == contentLength){//每300ms更新一次进度
                     oldTime = currentTime;
                     EventBus.getDefault().post(new ProgressEvent(contentLength,bytesWritten,bytesWritten == contentLength,url));
-
                 }
-
             }
         };
-
     }
 }

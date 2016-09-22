@@ -160,7 +160,6 @@ public class RetrofitAdapter extends NetAdapter<Call> {
 
     @Override
     protected <E> Call newCommonJsonRequest(final ConfigInfo<E> configInfo) {
-
         return newCommonStringRequest(configInfo);
     }
        /* final long time = System.currentTimeMillis();

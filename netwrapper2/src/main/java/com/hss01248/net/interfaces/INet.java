@@ -13,15 +13,15 @@ public interface INet extends ILoginManager{//extends ILoginManager
 
     public <E> ConfigInfo<E> postString(String url, Map map, final MyNetListener<E> listener);
 
-    public<E> ConfigInfo<E> postStandardJsonResonse(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
+    public<E> ConfigInfo<E> postStandardJson(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
 
-    public<E> ConfigInfo<E> getStandardJsonResonse(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
+    public<E> ConfigInfo<E> getStandardJson(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
 
 
 
-    public<E> ConfigInfo<E> postCommonJsonResonse(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
+    public<E> ConfigInfo<E> postCommonJson(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
 
-    public<E> ConfigInfo<E> getCommonJsonResonse(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
+    public<E> ConfigInfo<E> getCommonJson(String url, Map map, Class<E> clazz, final MyNetListener<E> listener);
 
 
 

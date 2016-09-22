@@ -163,15 +163,7 @@ public class RetrofitClient extends BaseNet<Call> {
             initUpload();
         }
         configInfo.listener.registEventBus();
-
-
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
-/* UploadFileRequestBody fileRequestBody = new UploadFileRequestBody(file, new DefaultProgressListener(mHandler,1));
-        requestBodyMap.put("file\"; filename=\"" + file.getName(), fileRequestBody);
-*/
-
-        //添加文件
-
         if (configInfo.files != null && configInfo.files.size() >0){
             Map<String,String> files = configInfo.files;
             int count = files.size();
@@ -183,18 +175,11 @@ public class RetrofitClient extends BaseNet<Call> {
                     File file = new File(value);
                     String type = Tool.getMimeType(file);
                     Log.e("type","mimetype:"+type);
-
                     UploadFileRequestBody fileRequestBody = new UploadFileRequestBody(file, type,configInfo.url);
                     requestBodyMap.put(key+"\"; filename=\"" + file.getName(), fileRequestBody);
-
-                    // requestBodyMap.put(key, fileRequestBody);
-
                 }
             }
-
         }
-
-
 
         Call<ResponseBody> call = service.uploadWithProgress(configInfo.url,configInfo.params,requestBodyMap);
         call.enqueue(new Callback<ResponseBody>() {
@@ -257,9 +242,6 @@ public class RetrofitClient extends BaseNet<Call> {
 
                     return;
                 }
-
-
-                Log.e("download","onResponse finished");
                 //开子线程将文件写到指定路径中
                 SimpleTask<Boolean> simple = new SimpleTask<Boolean>() {
 
@@ -279,14 +261,6 @@ public class RetrofitClient extends BaseNet<Call> {
                     }
                 };
                 simple.execute();
-                /*
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        writeResponseBodyToDisk(response.body(),configInfo.filePath,configInfo.listener);
-                    }
-                }).start();
-*/
             }
 
             @Override
@@ -396,24 +370,17 @@ public class RetrofitClient extends BaseNet<Call> {
 
                 inputStream = body.byteStream();
                 outputStream = new FileOutputStream(futureStudioIconFile);
-
                 while (true) {
                     int read = inputStream.read(fileReader);
-
                     if (read == -1) {
                         break;
                     }
-
                     outputStream.write(fileReader, 0, read);
-
                     fileSizeDownloaded += read;
-
                     Log.d("io", "file download: " + fileSizeDownloaded + " of " + fileSize);//// TODO: 2016/9/21  这里也可以实现进度监听
                 }
 
                 outputStream.flush();
-
-
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();

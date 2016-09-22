@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
                 break;
             case R.id.get_json:
                 Map<String,String> map2 = new HashMap<>();
-                MyNetApi.getCommonJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
+                MyNetApi.getCommonJson("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
                         map2, GetCommonJsonBean.class, new MyNetListener<GetCommonJsonBean>() {
                     @Override
                     public void onSuccess(GetCommonJsonBean response, String resonseStr) {
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
                 map3.put("pageSize","30");
                 map3.put("articleId","1738");
                 map3.put("pageIndex","1");
-                MyNetApi.postCommonJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postCommonJson("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
                         map3, PostCommonJsonBean.class, new MyNetListener<PostCommonJsonBean>() {
                     @Override
                     public void onSuccess(PostCommonJsonBean response, String resonseStr) {
@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
                 break;
             case R.id.get_standard_json:
                 Map<String,String> map4 = new HashMap<>();
-                MyNetApi.getStandardJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
+                MyNetApi.getStandardJson("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
                         map4, GetStandardJsonBean.class, new MyNetListener<GetStandardJsonBean>() {
                             @Override
                             public void onSuccess(GetStandardJsonBean response, String resonseStr) {
@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
                 map5.put("pageSize","30");
                 map5.put("articleId","1738");
                 map5.put("pageIndex","1");
-                MyNetApi.postStandardJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postStandardJson("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
                         map5, PostStandardJsonArray.class, new MyNetListener<PostStandardJsonArray>() {
                             @Override
                             public void onSuccess(PostStandardJsonArray response, String resonseStr) {
@@ -239,23 +239,23 @@ public class MainActivity extends Activity {
             case R.id.button2:
                 Map<String, String> map = new HashMap<String, String>();
                // map.put("id", "145");
-                RetrofitAdapter.getInstance().postStandardJsonResonse("api/voice/categoryList/v1.json",
+                RetrofitAdapter.getInstance().postStandardJson("api/voice/categoryList/v1.json",
                         map, "kk", new MyNetListener<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject response, String resonseStr) {
-                        Log.e("postStandardJsonResonse","onSuccess");
+                        Log.e("postStandardJson","onSuccess");
                     }
 
                     @Override
                     public void onSuccess(JSONObject response, String responseStr, String data, int code, String msg) {
                        // super.onSuccess(response, responseStr, data, code, msg);
-                        Log.e("postStandardJsonResonse","onSuccess long "+ "code:"+code + "--msg:"+ msg + "--data:"+data);
+                        Log.e("postStandardJson","onSuccess long "+ "code:"+code + "--msg:"+ msg + "--data:"+data);
                     }
 
                     @Override
                     public void onError(String error) {
                         super.onError(error);
-                        Log.e("postStandardJsonResonse","onError:"+error);
+                        Log.e("postStandardJson","onError:"+error);
                     }
                 });
                 break;

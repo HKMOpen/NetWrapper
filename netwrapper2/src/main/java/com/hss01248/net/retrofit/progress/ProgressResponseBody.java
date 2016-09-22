@@ -61,28 +61,16 @@ public class ProgressResponseBody extends ResponseBody {
             public long read(Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-               // progressListener.onProgress(totalBytesRead, responseBody.contentLength(), bytesRead == -1);
                 timeNow = System.currentTimeMillis();
 
                 if (timeNow - timePre > NetDefaultConfig.PROGRESS_INTERMEDIATE || totalBytesRead == responseBody.contentLength()){//至少300ms才更新一次状态
                     timePre = timeNow;
                     EventBus.getDefault().post(new ProgressEvent(totalBytesRead,responseBody.contentLength(),
                             totalBytesRead == responseBody.contentLength(),url));
-                   // ProgressResponseBody.this.onProgress(totalBytesRead,responseBody.contentLength(), bytesRead == -1,url);
-
                 }
-
-
-
                 return bytesRead;
             }
         };
     }
-
-    public void onProgress(long totalLength, long totalBytesRead, boolean done, String url){
-    }
-
-
-
 
 }

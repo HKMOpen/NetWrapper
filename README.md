@@ -74,7 +74,7 @@ Step 2. Add the dependency
 
 ```java
 dependencies {
-        compile 'com.github.hss01248:NetWrapper:0.1.1'
+        compile 'com.github.hss01248:NetWrapper:0.1.2'
 }
 ```
 
@@ -105,16 +105,16 @@ postString( String url,  Map map,  MyNetListener listener).start()
 
 //标准json
 
-postStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener).start()
+postStandardJson( String url,  Map map, Class clazz, MyNetListener listener).start()
 
-getStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener).start()
+getStandardJson( String url,  Map map, Class clazz, MyNetListener listener).start()
 
 
 //普通jsonObject和JsonArray
 
-postCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener).start()
+postCommonJson( String url,  Map map, Class clazz, MyNetListener listener).start()
 
-getCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener).start()
+getCommonJson( String url,  Map map, Class clazz, MyNetListener listener).start()
 
 //上传和下载
 

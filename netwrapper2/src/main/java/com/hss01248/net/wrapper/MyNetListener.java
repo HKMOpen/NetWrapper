@@ -114,14 +114,11 @@ public abstract class MyNetListener<T> {
     public void  onMessage(ProgressEvent event){
         if (event.url.equals(url)){
             onProgressChange(event.totalLength,event.totalBytesRead);
-
             if (event.done){
                 unRegistEventBus();
                 onFinish();
             }
         }
-
-
     }
 
 

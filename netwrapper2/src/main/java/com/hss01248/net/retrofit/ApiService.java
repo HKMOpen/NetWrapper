@@ -2,7 +2,6 @@ package com.hss01248.net.retrofit;
 
 
 import com.hss01248.net.config.BaseNetBean;
-import com.hss01248.net.config.ConfigInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -127,10 +126,10 @@ public interface  ApiService {
      * */
     @FormUrlEncoded
     @POST()
-    <T>  Call<T> postCommonJson(@Url String url, @FieldMap Map<String, String> maps, ConfigInfo<T> info);
+    <T>  Call<T> postCommonJson(@Url String url, @FieldMap Map<String, String> maps);
 
     @GET()
-    <T>  Call<T> getCommonJson(@Url String url, @QueryMap Map<String, String> maps, ConfigInfo<T> info);
+    <T>  Call<T> getCommonJson(@Url String url, @QueryMap Map<String, String> maps);
 
 
 

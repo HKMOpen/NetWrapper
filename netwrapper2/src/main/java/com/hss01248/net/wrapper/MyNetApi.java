@@ -61,23 +61,23 @@ public class MyNetApi {
     }
 
 
-    public static ConfigInfo postStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
-        return adapter.postStandardJsonResonse(url,map,clazz,listener);
+    public static ConfigInfo postStandardJson(String url, Map map, Class clazz, MyNetListener listener) {
+        return adapter.postStandardJson(url,map,clazz,listener);
     }
 
 
-    public static ConfigInfo getStandardJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
-        return  adapter.getStandardJsonResonse(url,map,clazz,listener);
+    public static ConfigInfo getStandardJson(String url, Map map, Class clazz, MyNetListener listener) {
+        return  adapter.getStandardJson(url,map,clazz,listener);
     }
 
 
-    public static ConfigInfo postCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
-        return  adapter.postCommonJsonResonse(url,map,clazz,listener);
+    public static ConfigInfo postCommonJson(String url, Map map, Class clazz, MyNetListener listener) {
+        return  adapter.postCommonJson(url,map,clazz,listener);
     }
 
 
-    public static ConfigInfo getCommonJsonResonse( String url,  Map map, Class clazz, MyNetListener listener) {
-        return  adapter.getCommonJsonResonse(url,map,clazz,listener);
+    public static ConfigInfo getCommonJson(String url, Map map, Class clazz, MyNetListener listener) {
+        return  adapter.getCommonJson(url,map,clazz,listener);
     }
 
 

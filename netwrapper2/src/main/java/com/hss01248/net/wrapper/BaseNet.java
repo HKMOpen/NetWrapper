@@ -50,7 +50,7 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
     }
 
     @Override
-    public <E> ConfigInfo<E> postStandardJsonResonse(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
+    public <E> ConfigInfo<E> postStandardJson(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo();
         setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON_FORMATTED;
@@ -59,7 +59,7 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
     }
 
     @Override
-    public <E> ConfigInfo<E> getStandardJsonResonse(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
+    public <E> ConfigInfo<E> getStandardJson(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo<E>();
         setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON_FORMATTED;
@@ -67,7 +67,7 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
     }
 
     @Override
-    public <E> ConfigInfo<E> postCommonJsonResonse(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
+    public <E> ConfigInfo<E> postCommonJson(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo();
         setKeyInfo(info,url,map,clazz,listener);
         info.method = HttpMethod.POST;
@@ -76,7 +76,7 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
     }
 
     @Override
-    public <E> ConfigInfo<E> getCommonJsonResonse(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
+    public <E> ConfigInfo<E> getCommonJson(String url, Map map, Class<E> clazz, MyNetListener<E> listener) {
         ConfigInfo<E> info = new ConfigInfo<E>();
         setKeyInfo(info,url,map,clazz,listener);
         info.type = ConfigInfo.TYPE_JSON;
