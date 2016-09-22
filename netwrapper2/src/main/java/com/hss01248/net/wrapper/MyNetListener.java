@@ -35,12 +35,16 @@ public abstract class MyNetListener<T> {
     /** Called when response success. */
     public abstract void onSuccess(T response,String resonseStr);
 
+    public  void onSuccessArr(List<T> response,String resonseStr){
+
+    }
+
     public  void onSuccessObj(T response,String responseStr,String data,int code,String msg){
             onSuccess(response,responseStr);
     }
 
     public  void onSuccessArr(List<T> response, String responseStr, String data, int code, String msg){
-       // onSuccess(response,responseStr);
+        onSuccessArr(response,responseStr);
     }
 
 

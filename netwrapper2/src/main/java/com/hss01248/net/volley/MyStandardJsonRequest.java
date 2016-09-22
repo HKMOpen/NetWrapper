@@ -79,11 +79,11 @@ public class MyStandardJsonRequest<T>  {//extends Request<BaseNetBean<T>>
     public int cacheHitCount = 0;
 
     @Override  //怎么判断是从缓存中取的还是从网络上取的?
-    public void addMarker(String tag) {
-        super.addMarker(tag);
-        if ("cache-hit".equals(tag)){
+    public void addMarker(String tagForCancle) {
+        super.addMarker(tagForCancle);
+        if ("cache-hit".equals(tagForCancle)){
             cacheHitCount++;
-        }else if ("cache-hit-parsed".equals(tag)){
+        }else if ("cache-hit-parsed".equals(tagForCancle)){
             cacheHitCount++;
         }
 

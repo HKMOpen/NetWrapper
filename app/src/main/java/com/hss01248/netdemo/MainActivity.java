@@ -6,10 +6,10 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 
-import com.hss01248.net.retrofit.RetrofitAdapter;
+import com.hss01248.net.retrofit.RetrofitClient;
 import com.hss01248.net.wrapper.MyJson;
+import com.hss01248.net.wrapper.MyNetApi;
 import com.hss01248.net.wrapper.MyNetListener;
-import com.hss01248.net.wrapper.MyNetUtil;
 import com.hss01248.netdemo.bean.GetCommonJsonBean;
 import com.hss01248.netdemo.bean.GetStandardJsonBean;
 import com.hss01248.netdemo.bean.PostCommonJsonBean;
@@ -51,8 +51,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        RetrofitAdapter adapter =  RetrofitAdapter.getInstance();
-        MyNetUtil.init(this,adapter);
+        MyNetApi.init(this, RetrofitClient.getInstance());
         Logger.init("net");
     }
 
@@ -60,54 +59,54 @@ public class MainActivity extends Activity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.get_string:
-                MyNetUtil.getString("http://www.qxinli.com/Application/about/androidAbout.html", new HashMap(), String.class, new MyNetListener<String>() {
+                MyNetApi.getString("http://www.qxinli.com/Application/about/androidAbout.html", new HashMap(),  new MyNetListener<String>() {
                     @Override
                     public void onSuccess(String response, String resonseStr) {
                         Logger.e(response);
 
                     }
-                });
+                }).start();
                 break;
             case R.id.post_string:
                 Map<String,String> map = new HashMap<>();
                 map.put("pageSize","30");
                 map.put("articleId","1738");
                 map.put("pageIndex","1");
-                MyNetUtil.postString("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
-                        map, String.class, new MyNetListener<String>() {
+                MyNetApi.postString("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                        map,  new MyNetListener<String>() {
                     @Override
                     public void onSuccess(String response, String resonseStr) {
                         Logger.e(response);
                     }
-                });
+                }).start();
                 break;
             case R.id.get_json:
                 Map<String,String> map2 = new HashMap<>();
-                MyNetUtil.getCommonJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
+                MyNetApi.getCommonJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
                         map2, GetCommonJsonBean.class, new MyNetListener<GetCommonJsonBean>() {
                     @Override
                     public void onSuccess(GetCommonJsonBean response, String resonseStr) {
                         Logger.json(MyJson.toJsonStr(response));
                     }
-                });
+                }).start();
                 break;
             case R.id.post_json:
                 Map<String,String> map3 = new HashMap<>();
                 map3.put("pageSize","30");
                 map3.put("articleId","1738");
                 map3.put("pageIndex","1");
-                MyNetUtil.postCommonJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postCommonJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
                         map3, PostCommonJsonBean.class, new MyNetListener<PostCommonJsonBean>() {
                     @Override
                     public void onSuccess(PostCommonJsonBean response, String resonseStr) {
                         Logger.json(MyJson.toJsonStr(response));
                     }
-                });
+                }).start();
 
                 break;
             case R.id.get_standard_json:
                 Map<String,String> map4 = new HashMap<>();
-                MyNetUtil.getStandardJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
+                MyNetApi.getStandardJsonResonse("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
                         map4, GetStandardJsonBean.class, new MyNetListener<GetStandardJsonBean>() {
                             @Override
                             public void onSuccess(GetStandardJsonBean response, String resonseStr) {
@@ -119,7 +118,7 @@ public class MainActivity extends Activity {
                                 super.onError(error);
                                 Logger.e("code:"+error);
                             }
-                        });
+                        }).start();
                 break;
             case R.id.post_standard_json:
 
@@ -127,7 +126,7 @@ public class MainActivity extends Activity {
                 map5.put("pageSize","30");
                 map5.put("articleId","1738");
                 map5.put("pageIndex","1");
-                MyNetUtil.postStandardJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postStandardJsonResonse("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
                         map5, PostStandardJsonArray.class, new MyNetListener<PostStandardJsonArray>() {
                             @Override
                             public void onSuccess(PostStandardJsonArray response, String resonseStr) {
@@ -139,7 +138,7 @@ public class MainActivity extends Activity {
                                 super.onSuccessArr(response, responseStr, data, code, msg);
                                 Logger.json(MyJson.toJsonStr(response));
                             }
-                        });
+                        }).start();
                 break;
             case R.id.download:
                 File dir = Environment.getExternalStorageDirectory();
@@ -151,7 +150,7 @@ public class MainActivity extends Activity {
                         e.printStackTrace();
                     }
                 }
-                MyNetUtil.download("http://www.qxinli.com/download/qxinli.apk", file.getAbsolutePath(), new MyNetListener() {
+                MyNetApi.download("http://www.qxinli.com/download/qxinli.apk", file.getAbsolutePath(), new MyNetListener() {
                     @Override
                     public void onSuccess(Object response, String onSuccess) {
                         Logger.e("onSuccess:"+onSuccess);
@@ -162,7 +161,7 @@ public class MainActivity extends Activity {
                         super.onProgressChange(fileSize, downloadedSize);
                         Logger.e("progress:"+downloadedSize);
                     }
-                });
+                }).start();
                 break;
             case R.id.upload:
 
@@ -174,7 +173,7 @@ public class MainActivity extends Activity {
                 Map<String,String> map7 = new HashMap<>();
                 map7.put("uploadFile","/storage/emulated/0/app-debug.apk");///storage/emulated/0/DCIM/1474363536041.jpg  /storage/emulated/0/apkpure_downcc.apk  application/vnd.android.package-archive
 
-                MyNetUtil.upLoad("http://192.168.1.100:8080/gm/file/q_uploadAndroidApk.do",
+                MyNetApi.upLoad("http://192.168.1.100:8080/gm/file/q_uploadAndroidApk.do",
                         map6,map7, new MyNetListener<String>() {
                             @Override
                             public void onSuccess(String response, String resonseStr) {
@@ -192,7 +191,7 @@ public class MainActivity extends Activity {
                                 super.onProgressChange(fileSize, downloadedSize);
                                 Logger.e("upload onProgressChange:"+downloadedSize + "  total:"+ fileSize +"  progress:"+downloadedSize*100/fileSize);
                             }
-                        });
+                        }).start();
                 break;
         }
     }
