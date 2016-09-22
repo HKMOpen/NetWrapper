@@ -74,20 +74,30 @@ public class Tool {
     }
 
 
-
-
-    public static <T> void parseInTime(long time, ConfigInfo<T> configInfo, final Runnable runnable
-    ) {
+    /**
+     *
+     * @param startTime 请求刚开始的时间
+     * @param configInfo
+     * @param runnable 要执行的代码,通常是最终的网络回调
+     * @param <T>
+     */
+    public static <T> void parseInTime(long startTime, ConfigInfo<T> configInfo, final Runnable runnable) {
         long time2 = System.currentTimeMillis();
-        long gap = time2 - time;
+        long gap = time2 - startTime;
 
-        if (configInfo.isForceMinTime && (gap < NetDefaultConfig.TIME_MINI)){
-            TimerUtil.doAfter(new TimerTask() {
-                @Override
-                public void run() {
-                    runnable.run();
-                }
-            },(NetDefaultConfig.TIME_MINI - gap));
+        if (configInfo.isForceMinTime ){
+            long minGap = configInfo.minTime <= 0 ? NetDefaultConfig.TIME_MINI : configInfo.minTime;
+
+            if (gap < minGap){
+                TimerUtil.doAfter(new TimerTask() {
+                    @Override
+                    public void run() {
+                        runnable.run();
+                    }
+                },(minGap - gap));
+            }else {
+                runnable.run();
+            }
 
         }else {
             runnable.run();

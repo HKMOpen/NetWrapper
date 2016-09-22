@@ -93,7 +93,7 @@ public class ConfigInfo<T> {
 
 
 
-    public ConfigInfo<T> setAppendToken(boolean isAppendToken){
+    public ConfigInfo<T> setIsAppendToken(boolean isAppendToken){
         this.isAppendToken = isAppendToken;
         return this;
     }
@@ -133,17 +133,21 @@ public class ConfigInfo<T> {
     //強制控制回調的最短時間,默認不控制,如果需要,則自己寫
     public  int minTime = 0;
 
-    public ConfigInfo<T> setMinCallbackTime(int minTime){
+    /**
+     *
+     * @param isForceMinTime 是否强制最短时间
+     * @param minTime 自定义的最短时间.如果为小于0,则采用默认的1500ms
+     * @return
+     */
+    public ConfigInfo<T> setMinCallbackTime(boolean isForceMinTime,int minTime){
+        this.isForceMinTime = isForceMinTime;
         this.minTime = minTime;
         return this;
     }
 
     public boolean isForceMinTime = false;
 
-    public ConfigInfo<T> setIsForceMinTime(boolean isForceMinTime){
-        this.isForceMinTime = isForceMinTime;
-        return this;
-    }
+
 
     //用于取消请求用的
     public Object tagForCancle = "";

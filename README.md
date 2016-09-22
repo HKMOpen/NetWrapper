@@ -12,6 +12,10 @@
 
 上传和下载的进度回调(填了很大的坑)
 
+指定请求回调的最短时间
+
+自动登录和登录状态接口
+
 
 
 
@@ -49,6 +53,37 @@
 
 
 # usage
+
+
+
+## gradle
+
+Step 1. Add the JitPack repository to your build file
+
+Add it in your root build.gradle at the end of repositories:
+
+```
+allprojects {
+    repositories {
+        ...
+        maven { url "https://jitpack.io" }
+    }
+}
+
+
+```
+
+Step 2. Add the dependency
+
+```
+dependencies {
+        compile 'com.github.hss01248:FaceDetect:1.0.0'
+}
+```
+
+
+
+## api
 
 ```
 getString(String url, Map map, MyNetListener listener).setXxx()....start();
@@ -90,6 +125,12 @@ download(String url, String savedpath, MyNetListener listener).start()
 
 upLoad(String url, Map<String,String> params,Map<String,String> files, MyNetListener callback).start()
 
+//自动登录相关:
+autoLogin();
+
+autoLogin(MyNetListener myNetListener);
+
+boolean isLogin();
 ```
 
 
@@ -180,6 +221,7 @@ public static void setStandardJsonKey(String data,String code,String msg,int cod
 > 主要是因为,okhttp只缓存get请求,不缓存post请求.但实际工作中有时需要缓存post请求的数据.
 
 
+
 >屏蔽的思路: 请求头cacheControl指定为no-cache,然后用拦截器修改响应头,移除expeirs,pragma之类的字段并把cacheControl改为no-cache.
 
 ## 配置单个请求的缓存策略(默认是无缓存)
@@ -196,6 +238,25 @@ ConfigInfo:
  * @return
  */
 public ConfigInfo<T> setCacheControl(boolean shouldReadCache,boolean shouldCacheResponse,long cacheTimeInSeconds)
+```
+
+
+
+# 请求最短回调时间的设置
+> 主要针对如下情况:
+>
+> 发送网络请求之前弹出一个dialog来提示加载中,回调成功后dismiss并关掉整个activity.如果回调很快,可能会出现: dialog还没有弹出来,activity就关掉了,crash,日志为bad windowToken,is your activity running?  这时,需要指定最短回调时间,一般dialog弹出需要几百毫秒不等,限定1s或2s即可.
+
+## 设置:
+
+```java
+/**
+ *
+ * @param isForceMinTime 是否强制最短时间
+ * @param minTime 自定义的最短时间.如果为小于0,则采用默认的1500ms
+ * @return
+ */
+public ConfigInfo<T> setMinCallbackTime(boolean isForceMinTime,int minTime)
 ```
 
 

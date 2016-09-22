@@ -6,6 +6,8 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 
+import com.hss01248.net.config.ConfigInfo;
+import com.hss01248.net.interfaces.ILoginManager;
 import com.hss01248.net.retrofit.RetrofitClient;
 import com.hss01248.net.wrapper.MyJson;
 import com.hss01248.net.wrapper.MyNetApi;
@@ -51,7 +53,22 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        MyNetApi.init(this, RetrofitClient.getInstance());
+        MyNetApi.init(this, RetrofitClient.getInstance(), new ILoginManager() {
+            @Override
+            public boolean isLogin() {
+                return false;
+            }
+
+            @Override
+            public <T> ConfigInfo<T> autoLogin() {
+                return null;
+            }
+
+            @Override
+            public <T> ConfigInfo<T> autoLogin(MyNetListener<T> listener) {
+                return null;
+            }
+        });
         Logger.init("net");
     }
 
