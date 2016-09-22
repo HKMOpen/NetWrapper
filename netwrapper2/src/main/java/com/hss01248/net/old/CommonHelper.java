@@ -5,7 +5,6 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hss01248.net.cache.ACache;
-import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.NetDefaultConfig;
 import com.hss01248.net.wrapper.MyJson;
@@ -171,7 +170,7 @@ public class CommonHelper {
                                                 final NetAdapter adapter){
 
         switch (code){
-            case BaseNetBean.CODE_SUCCESS://请求成功
+            case 1://请求成功
 
                 if (isJsonEmpty(data)){
                     configInfo.listener.onEmpty();
@@ -196,10 +195,10 @@ public class CommonHelper {
                 }
 
                 break;
-            case BaseNetBean.CODE_UN_FOUND://没有找到内容
+            case 2://没有找到内容
                 configInfo.listener.onUnFound();
                 break;
-            case BaseNetBean.CODE_UNLOGIN://未登录
+            case 3://未登录
                 adapter.autoLogin(new MyNetListener() {
                     @Override
                     public void onSuccess(Object response, String resonseStr) {

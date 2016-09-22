@@ -56,6 +56,8 @@ public class RetrofitClient extends BaseNet<Call> {
                 .connectTimeout(10, TimeUnit.SECONDS).writeTimeout(15, TimeUnit.SECONDS) //设置超时
                 .retryOnConnectionFailure(true)//重试
                 //.addInterceptor(new ProgressInterceptor())//下载时更新进度
+                .addNetworkInterceptor(new NoCacheInterceptor())//request和resoponse都加上nocache,
+                .addInterceptor(new UseragentInterceptor())
                 .build();
 
         retrofit = new Retrofit
@@ -80,7 +82,9 @@ public class RetrofitClient extends BaseNet<Call> {
         OkHttpClient client=httpBuilder.readTimeout(0, TimeUnit.SECONDS)
                 .connectTimeout(30, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
                 .retryOnConnectionFailure(false)//重试
+                .addInterceptor(new UseragentInterceptor())
                 .addInterceptor(new ProgressInterceptor())//下载时更新进度
+
                 .build();
 
         retrofitDownload = new Retrofit
@@ -99,6 +103,7 @@ public class RetrofitClient extends BaseNet<Call> {
                 .connectTimeout(0, TimeUnit.SECONDS).writeTimeout(0, TimeUnit.SECONDS) //设置超时
                 .retryOnConnectionFailure(false)//重试
                 // .addInterceptor(new ProgressRequestInterceptor())//上传时更新进度
+                .addInterceptor(new UseragentInterceptor())
                /* .addNetworkInterceptor(new Interceptor() {
                     @Override
                     public okhttp3.Response intercept(Chain chain) throws IOException {

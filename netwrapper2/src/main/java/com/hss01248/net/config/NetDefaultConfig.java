@@ -21,6 +21,8 @@ public class NetDefaultConfig {
 
     public static long PROGRESS_INTERMEDIATE = 100;//进度条更新间隔,默认100ms
 
+    public static String USER_AGENT = "";
+
 
     public  static  String KEY_DATA = "data";
     public static  String KEY_CODE = "code";

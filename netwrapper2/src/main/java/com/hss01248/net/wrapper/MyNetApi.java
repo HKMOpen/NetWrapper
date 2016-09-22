@@ -1,6 +1,7 @@
 package com.hss01248.net.wrapper;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
@@ -26,6 +27,8 @@ public class MyNetApi {
             //避免可能的无限循环调用
         }
         MyNetApi.adapter.setLoginManager(loginManager);
+        NetDefaultConfig.USER_AGENT = System.getProperty("http.agent");
+        Log.e("e","user-agent:"+ NetDefaultConfig.USER_AGENT);
 
     }
 
