@@ -8,7 +8,7 @@
 
 # 已完成
 
-缓存完全由客户端自行控制(ACache)
+缓存完全由客户端自行控制(ACache),利用http请求头来完全屏蔽okhttp的缓存体系
 
 上传和下载的进度回调(填了很大的坑)
 
@@ -46,8 +46,6 @@
 
 无网络时读缓存
 
-利用http请求头来完全屏蔽okhttp的缓存体系
-
 缓存文件夹大小的设置
 
 
@@ -70,14 +68,13 @@ allprojects {
     }
 }
 
-
 ```
 
 Step 2. Add the dependency
 
-```
+```java
 dependencies {
-        compile 'com.github.hss01248:FaceDetect:1.0.0'
+        compile 'com.github.hss01248:NetWrapper:0.1.1'
 }
 ```
 
