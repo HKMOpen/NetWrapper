@@ -233,12 +233,9 @@ public class RetrofitClient extends BaseNet<Call> {
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
 
                 if (!response.isSuccessful()){
-                    Tool.parseInTime(time, configInfo, new Runnable() {
-                        @Override
-                        public void run() {
+
                             configInfo.listener.onError(response.code()+"");
-                        }
-                    });
+
 
                     return;
                 }
@@ -265,12 +262,9 @@ public class RetrofitClient extends BaseNet<Call> {
 
             @Override
             public void onFailure(Call<ResponseBody> call, final Throwable t) {
-                Tool.parseInTime(time, configInfo, new Runnable() {
-                    @Override
-                    public void run() {
+
                         configInfo.listener.onError(t.toString());
-                    }
-                });
+
             }
         });
         return call;
@@ -281,7 +275,7 @@ public class RetrofitClient extends BaseNet<Call> {
     protected <E> Call newCommonStringRequest(final ConfigInfo<E> configInfo) {
         Log.e("url","newCommonStringRequest:"+configInfo.url);
 
-        final long time = System.currentTimeMillis();
+
 
         Call<ResponseBody> call;
 
@@ -291,12 +285,10 @@ public class RetrofitClient extends BaseNet<Call> {
             call = service.executePost(configInfo.url,configInfo.params);
         }else {
 
-            Tool.parseInTime(time, configInfo, new Runnable() {
-                @Override
-                public void run() {
+
                     configInfo.listener.onError("不是get或post方法");
-                }
-            });
+
+
 
             call = null;
             return call;
@@ -308,12 +300,9 @@ public class RetrofitClient extends BaseNet<Call> {
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
 
                 if (!response.isSuccessful()){
-                    Tool.parseInTime(time, configInfo, new Runnable() {
-                        @Override
-                        public void run() {
+
                             configInfo.listener.onError(response.code()+"");
-                        }
-                    });
+
 
                     return;
                 }
@@ -324,28 +313,22 @@ public class RetrofitClient extends BaseNet<Call> {
                     final String finalString = string;
                     //从这里开始,分类进行解析
 
-                    Tool.parseStringByType(time,string,configInfo);
+                    Tool.parseStringByType(configInfo.startTime,string,configInfo);
 
                 } catch (final IOException e) {
                     e.printStackTrace();
-                    Tool.parseInTime(time, configInfo, new Runnable() {
-                        @Override
-                        public void run() {
+
                             configInfo.listener.onError(e.toString());
-                        }
-                    });
+
                 }
 
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, final Throwable t) {
-                Tool.parseInTime(time, configInfo, new Runnable() {
-                    @Override
-                    public void run() {
+
                         configInfo.listener.onError(t.toString());
-                    }
-                });
+
             }
         });
 

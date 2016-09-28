@@ -1,6 +1,12 @@
 package com.hss01248.net.config;
 
+import android.app.Dialog;
+import android.content.Context;
+import android.text.TextUtils;
+
+import com.hss01248.lib.StytledDialog;
 import com.hss01248.net.interfaces.INet;
+import com.hss01248.net.wrapper.MyNetApi;
 import com.hss01248.net.wrapper.MyNetListener;
 
 import java.util.Map;
@@ -130,22 +136,73 @@ public class ConfigInfo<T> {
     }
 
 
-    //強制控制回調的最短時間,默認不控制,如果需要,則自己寫
+    //強制控制回調的最短時間,默認不控制,如果需要,則自己寫.单位毫秒
     public  int minTime = 0;
 
-    /**
-     *
-     * @param isForceMinTime 是否强制最短时间
-     * @param minTime 自定义的最短时间.如果为小于0,则采用默认的1500ms
-     * @return
-     */
-    public ConfigInfo<T> setMinCallbackTime(boolean isForceMinTime,int minTime){
-        this.isForceMinTime = isForceMinTime;
-        this.minTime = minTime;
+    public long startTime;
+
+    public ConfigInfo<T> setDialogMinShowTime(int minTime){
+        if (minTime >NetDefaultConfig.TIME_MINI){
+            this.minTime = minTime;
+        }else {
+            this.minTime = NetDefaultConfig.TIME_MINI;
+        }
         return this;
     }
 
+
+    /**
+     *
+     * @param loadingMsg 提示语
+     * @param activity  Context ,最好传入activity,当然context也可以
+     * @return
+     */
+    public ConfigInfo<T> setShowLoadingDialog(String loadingMsg, Context activity){
+        return setShowLoadingDialog(null,loadingMsg,activity,0);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog){
+
+        return  setShowLoadingDialog(loadingDialog,"",null,0);
+    }
+
+
+
+    private ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog,String msg,Context activity,int minTime){
+        if (loadingDialog == null){
+            if (TextUtils.isEmpty(msg)){
+                msg = "加载中...";
+            }
+            if (activity == null){
+                this.loadingDialog = StytledDialog.showProgressDialog(MyNetApi.context,msg,false,false);//todo 生成dialog,先不显示
+            }else {
+                this.loadingDialog = StytledDialog.showProgressDialog(activity,msg,false,false);
+            }
+
+        }else {
+            this.loadingDialog = loadingDialog;
+        }
+
+        this.isForceMinTime = true;
+
+        if (minTime >NetDefaultConfig.TIME_MINI){
+            this.minTime = minTime;
+        }else {
+            this.minTime = NetDefaultConfig.TIME_MINI;
+        }
+
+        return this;
+    }
+
+
+
     public boolean isForceMinTime = false;
+
+    public Dialog loadingDialog;
 
 
 
@@ -164,20 +221,6 @@ public class ConfigInfo<T> {
     public boolean shouldCacheResponse = false;
     public long cacheTime = NetDefaultConfig.CACHE_TIME; //单位秒
 
-   /* public ConfigInfo<T> setShouldReadCache(boolean shouldReadCache){
-        this.shouldReadCache = shouldReadCache;
-        return this;
-    }
-
-    public ConfigInfo<T> setShouldCacheResponse(boolean shouldCacheResponse){
-        this.shouldCacheResponse = shouldCacheResponse;
-        return this;
-    }
-
-    public ConfigInfo<T> setCacheTime(long cacheTimeInSeconds){
-        this.cacheTime = cacheTimeInSeconds;
-        return this;
-    }*/
 
     /**
      * 只支持String和json类型的请求,不支持文件下载的缓存.

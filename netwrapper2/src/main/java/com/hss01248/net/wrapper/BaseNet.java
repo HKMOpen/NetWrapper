@@ -29,7 +29,8 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
         info.url = url;
         info.params = map;
         info.clazz = clazz;
-        info.listener = listener;
+        info.startTime = System.currentTimeMillis();
+        info.listener = ProxyTools.getNetListenerProxy(listener,info);//使用代理
         info.client = this;
     }
 
@@ -155,6 +156,10 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
         if (configInfo.isAppendToken){
 
             Tool.addToken(configInfo.params);
+        }
+
+        if (configInfo.loadingDialog != null && !configInfo.loadingDialog.isShowing()){
+            configInfo.loadingDialog.show();
         }
 
        // configInfo.client = this;

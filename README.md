@@ -4,6 +4,104 @@
 
 
 
+# update
+
+## 0.1.3 
+
+加上自动显示loadingdialog的功能:
+
+```java
+public ConfigInfo<T> setDialogMinShowTime(int minTime)
+
+public ConfigInfo<T> setShowLoadingDialog(String loadingMsg, Context activity)
+
+public ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog)
+  
+
+```
+
+
+
+面向切面,网络回调加上动态代理:
+
+
+
+```java
+//generateProxy:
+
+protected  <E> void setKeyInfo(ConfigInfo<E> info, String url, Map map, Class<E> clazz, MyNetListener<E> listener){
+        info.url = url;
+        info.params = map;
+        info.clazz = clazz;
+        info.startTime = System.currentTimeMillis();
+        info.listener = ProxyTools.getNetListenerProxy(listener,info);//使用代理
+        info.client = this;
+    }
+
+
+
+
+public static <T> T getNetListenerProxy(final T realObj, final ConfigInfo configInfo){
+      return (T) Proxy.newProxyInstance(ProxyTools.class.getClassLoader(), realObj.getClass().getInterfaces(), new InvocationHandler() {
+          @Override
+          public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
+
+              String name = method.getName();
+              if (!TextUtils.isEmpty(name) ){
+                  if (name.contains("onProgressChange") || name.contains("registEventBus")
+                          || name.contains("unRegistEventBus") || name.contains("onMessage"))
+                  method.invoke(realObj,args);
+              }else {
+                  Tool.parseInTime(configInfo.startTime, configInfo, new Runnable() {
+                      @Override
+                      public void run() {
+                          try {
+                              method.invoke(realObj,args);
+                          } catch (IllegalAccessException e) {
+                              e.printStackTrace();
+                          } catch (InvocationTargetException e) {
+                              e.printStackTrace();
+                          }
+                      }
+                  });
+              }
+
+              return proxy;
+          }
+      });
+
+}
+
+
+
+//int Tool.java:
+
+ public static <T> void parseInTime(long startTime, final ConfigInfo<T> configInfo, final Runnable runnable) {
+        long time2 = System.currentTimeMillis();
+        long gap = time2 - startTime;
+        if (configInfo.isForceMinTime ){
+            long minGap = configInfo.minTime <= 0 ? NetDefaultConfig.TIME_MINI : configInfo.minTime;
+
+            if (gap < minGap){
+                TimerUtil.doAfter(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Tool.dismiss(configInfo.loadingDialog);
+                        runnable.run();
+                    }
+                },(minGap - gap));
+            }else {
+                Tool.dismiss(configInfo.loadingDialog);
+                runnable.run();
+            }
+
+        }else {
+            Tool.dismiss(configInfo.loadingDialog);
+            runnable.run();
+        }
+    }
+```
+
 
 
 # 已完成

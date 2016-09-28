@@ -1,5 +1,7 @@
 package com.hss01248.net.wrapper;
 
+import android.app.Dialog;
+import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -8,7 +10,6 @@ import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.NetDefaultConfig;
-import com.hss01248.net.old.CommonHelper;
 import com.hss01248.net.old.MyNetUtil;
 import com.litesuits.android.async.SimpleTask;
 
@@ -81,10 +82,9 @@ public class Tool {
      * @param runnable 要执行的代码,通常是最终的网络回调
      * @param <T>
      */
-    public static <T> void parseInTime(long startTime, ConfigInfo<T> configInfo, final Runnable runnable) {
+    public static <T> void parseInTime(long startTime, final ConfigInfo<T> configInfo, final Runnable runnable) {
         long time2 = System.currentTimeMillis();
         long gap = time2 - startTime;
-
         if (configInfo.isForceMinTime ){
             long minGap = configInfo.minTime <= 0 ? NetDefaultConfig.TIME_MINI : configInfo.minTime;
 
@@ -92,14 +92,17 @@ public class Tool {
                 TimerUtil.doAfter(new TimerTask() {
                     @Override
                     public void run() {
+                        Tool.dismiss(configInfo.loadingDialog);
                         runnable.run();
                     }
                 },(minGap - gap));
             }else {
+                Tool.dismiss(configInfo.loadingDialog);
                 runnable.run();
             }
 
         }else {
+            Tool.dismiss(configInfo.loadingDialog);
             runnable.run();
         }
     }
@@ -116,16 +119,26 @@ public class Tool {
 
     }
 
+    public static void dismiss(Dialog dialog) {
+        if(dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+    }
+
+    public static void dismiss(AppCompatDialog dialog) {
+        if(dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+    }
+
 
 
     public  static  <E> void parseStandJsonStr(String string, long time, final ConfigInfo<E> configInfo)  {
         if (isJsonEmpty(string)){//先看是否为空
-            parseInTime(time,configInfo, new Runnable() {
-                @Override
-                public void run() {
-                    configInfo.listener.onEmpty();
-                }
-            });
+        configInfo.listener.onEmpty();
+
         }else {
 
             // final BaseNetBean<E> bean = MyJson.parseObject(string,BaseNetBean.class);//如何解析内部的字段?
@@ -138,12 +151,7 @@ public class Tool {
                 object = new JSONObject(string);
             } catch (JSONException e) {
                 e.printStackTrace();
-                parseInTime(time,configInfo, new Runnable() {
-                    @Override
-                    public void run() {
-                        configInfo.listener.onError("json 格式异常");
-                    }
-                });
+                configInfo.listener.onError("json 格式异常");
                 return;
             }
 
@@ -157,14 +165,8 @@ public class Tool {
 
             final String finalString1 = string;
 
-            parseInTime(time,configInfo, new Runnable() {
-                @Override
-                public void run() {
-
-                    parseStandardJsonObj(finalString1,dataStr,code,msg,configInfo);
-
-                }
-            });
+            parseStandardJsonObj(finalString1,dataStr,code,msg,configInfo);
+            //todo 将时间解析放到后面去
 
         }
     }
@@ -179,7 +181,8 @@ public class Tool {
 
      * @param <E>
      */
-    private static <E> void parseStandardJsonObj(String response,String data,int code,String msg, final ConfigInfo<E> configInfo){
+    private static <E> void parseStandardJsonObj(final String response, final String data, final int code,
+                                                 final String msg, final ConfigInfo<E> configInfo){
 
         int codeSuccess = configInfo.isCustomCodeSet ? configInfo.code_success : BaseNetBean.CODE_SUCCESS;
         int codeUnFound = configInfo.isCustomCodeSet ? configInfo.code_unFound : BaseNetBean.CODE_UN_FOUND;
@@ -188,47 +191,71 @@ public class Tool {
         if (code == codeSuccess){
             if (isJsonEmpty(data)){
                 configInfo.listener.onEmpty();
+
             }else {
                 try{
                     if (data.startsWith("{")){
-                        E bean =  MyJson.parseObject(data,configInfo.clazz);
-                        configInfo.listener.onSuccessObj(bean ,response,data,code,msg);
+                        final E bean =  MyJson.parseObject(data,configInfo.clazz);
+
+                                configInfo.listener.onSuccessObj(bean ,response,data,code,msg);
+
                         cacheResponse(response, configInfo);
                     }else if (data.startsWith("[")){
-                        List<E> beans =  MyJson.parseArray(data,configInfo.clazz);
-                        configInfo.listener.onSuccessArr(beans,response,data,code,msg);
+                        final List<E> beans =  MyJson.parseArray(data,configInfo.clazz);
+
+                                configInfo.listener.onSuccessArr(beans,response,data,code,msg);
+
+
                         cacheResponse(response, configInfo);
                     }else {//如果data的值是一个字符串,而不是标准json,那么直接返回
                         if (String.class.equals(configInfo.clazz) ){//此时,E也是String类型.如果有误,会抛出到下面catch里
-                            configInfo.listener.onSuccess((E) data,data);
+
+                                    configInfo.listener.onSuccess((E) data,data);
+
+
                         }else {
-                             configInfo.listener.onError("不是标准的json数据");
+
+
+                                    configInfo.listener.onError("不是标准的json数据");
+
                         }
                     }
 
-                }catch (Exception e){
+                }catch (final Exception e){
                     e.printStackTrace();
-                    configInfo.listener.onError(e.toString());
+
+
+                            configInfo.listener.onError(e.toString());
+
                     return;
                 }
             }
         }else if (code == codeUnFound){
-            configInfo.listener.onUnFound();
+
+
+                    configInfo.listener.onUnFound();
+
         }else if (code == codeUnlogin){
             configInfo.client.autoLogin(new MyNetListener() {
                 @Override
                 public void onSuccess(Object response, String resonseStr) {
-                    configInfo.client.resend(configInfo);
+
+
+                            configInfo.client.resend(configInfo);
+
                 }
 
                 @Override
                 public void onError(String error) {
                     super.onError(error);
-                    configInfo.listener.onUnlogin();
+
+
+                            configInfo.listener.onUnlogin();
+
                 }
             });
         }else {
-            configInfo.listener.onCodeError("",msg,code);
+                    configInfo.listener.onCodeError("",msg,code);
         }
 
     }
@@ -360,20 +387,14 @@ public class Tool {
                 cacheResponse(string, configInfo);
 
                 //处理结果
-                CommonHelper.parseInTime(time, configInfo, new Runnable() {
-                    @Override
-                    public void run() {
-                        configInfo.listener.onSuccess(string, string);
-                    }
-                });
+
+                 configInfo.listener.onSuccess(string, string);
+
                 break;
             case ConfigInfo.TYPE_JSON:
-                CommonHelper.parseInTime(time, configInfo, new Runnable() {
-                    @Override
-                    public void run() {
-                        parseCommonJson(time,string,configInfo);
-                    }
-                });
+
+                 parseCommonJson(time,string,configInfo);
+
 
                 break;
             case ConfigInfo.TYPE_JSON_FORMATTED:
