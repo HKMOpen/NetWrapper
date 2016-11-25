@@ -172,7 +172,7 @@ Step 2. Add the dependency
 
 ```java
 dependencies {
-        compile 'com.github.hss01248:NetWrapper:0.1.2'
+        compile 'com.github.hss01248:NetWrapper:0.1.3'
 }
 ```
 
