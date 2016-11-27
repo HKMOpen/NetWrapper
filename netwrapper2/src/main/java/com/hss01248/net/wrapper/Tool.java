@@ -1,7 +1,7 @@
 package com.hss01248.net.wrapper;
 
 import android.app.Dialog;
-import android.support.v7.app.AppCompatDialog;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -10,7 +10,6 @@ import com.hss01248.net.cache.ACache;
 import com.hss01248.net.config.BaseNetBean;
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.NetDefaultConfig;
-import com.hss01248.net.old.MyNetUtil;
 import com.litesuits.android.async.SimpleTask;
 
 import org.json.JSONException;
@@ -83,7 +82,8 @@ public class Tool {
      * @param <T>
      */
     public static <T> void parseInTime(long startTime, final ConfigInfo<T> configInfo, final Runnable runnable) {
-        long time2 = System.currentTimeMillis();
+        Tool.dismiss(configInfo.loadingDialog);
+      /*  long time2 = System.currentTimeMillis();
         long gap = time2 - startTime;
         if (configInfo.isForceMinTime ){
             long minGap = configInfo.minTime <= 0 ? NetDefaultConfig.TIME_MINI : configInfo.minTime;
@@ -104,7 +104,7 @@ public class Tool {
         }else {
             Tool.dismiss(configInfo.loadingDialog);
             runnable.run();
-        }
+        }*/
     }
 
 
@@ -126,16 +126,11 @@ public class Tool {
 
     }
 
-    public static void dismiss(AppCompatDialog dialog) {
-        if(dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
-
-    }
 
 
 
-    public  static  <E> void parseStandJsonStr(String string, long time, final ConfigInfo<E> configInfo)  {
+
+    public  static  <E> void parseStandJsonStr(String string,  final ConfigInfo<E> configInfo)  {
         if (isJsonEmpty(string)){//先看是否为空
         configInfo.listener.onEmpty();
 
@@ -240,18 +235,13 @@ public class Tool {
                 @Override
                 public void onSuccess(Object response, String resonseStr) {
 
-
-                            configInfo.client.resend(configInfo);
-
+                    configInfo.client.resend(configInfo);
                 }
 
                 @Override
                 public void onError(String error) {
                     super.onError(error);
-
-
-                            configInfo.listener.onUnlogin();
-
+                     configInfo.listener.onUnlogin();
                 }
             });
         }else {
@@ -379,7 +369,7 @@ public class Tool {
     }
 
 
-    public static  void parseStringByType(final long time, final String string, final ConfigInfo configInfo) {
+    public static  void parseStringByType(final String string, final ConfigInfo configInfo) {
         switch (configInfo.type){
             case ConfigInfo.TYPE_STRING:
 
@@ -393,12 +383,12 @@ public class Tool {
                 break;
             case ConfigInfo.TYPE_JSON:
 
-                 parseCommonJson(time,string,configInfo);
+                 parseCommonJson(string,configInfo);
 
 
                 break;
             case ConfigInfo.TYPE_JSON_FORMATTED:
-                parseStandJsonStr(string, time, configInfo);
+                parseStandJsonStr(string, configInfo);
                 break;
 
         }
@@ -410,7 +400,7 @@ public class Tool {
 
                 @Override
                 protected Void doInBackground() {
-                    ACache.get(MyNetUtil.context).put(getCacheKey(configInfo),string, (int) (configInfo.cacheTime));
+                    ACache.get(MyNetApi.context).put(getCacheKey(configInfo),string, (int) (configInfo.cacheTime));
                     return null;
                 }
 
@@ -422,7 +412,7 @@ public class Tool {
         }
     }
 
-    private static <E> void parseCommonJson(long time, String string, ConfigInfo<E> configInfo) {
+    private static <E> void parseCommonJson( String string, ConfigInfo<E> configInfo) {
 
         if (isJsonEmpty(string)){
             configInfo.listener.onEmpty();

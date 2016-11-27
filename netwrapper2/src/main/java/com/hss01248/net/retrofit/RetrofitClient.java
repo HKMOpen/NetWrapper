@@ -185,6 +185,7 @@ public class RetrofitClient extends BaseNet<Call> {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Tool.dismiss(configInfo.loadingDialog);
 
                 if (response.isSuccessful()){
                     try {
@@ -203,6 +204,7 @@ public class RetrofitClient extends BaseNet<Call> {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Tool.dismiss(configInfo.loadingDialog);
                 configInfo.listener.onError(t.toString());
 
             }
@@ -235,6 +237,7 @@ public class RetrofitClient extends BaseNet<Call> {
                 if (!response.isSuccessful()){
 
                             configInfo.listener.onError(response.code()+"");
+                    Tool.dismiss(configInfo.loadingDialog);
 
 
                     return;
@@ -249,6 +252,7 @@ public class RetrofitClient extends BaseNet<Call> {
 
                     @Override
                     protected void onPostExecute(Boolean result) {
+                        Tool.dismiss(configInfo.loadingDialog);
                         if (result){
                             configInfo.listener.onSuccess(configInfo.filePath,configInfo.filePath);
                         }else {
@@ -264,6 +268,7 @@ public class RetrofitClient extends BaseNet<Call> {
             public void onFailure(Call<ResponseBody> call, final Throwable t) {
 
                         configInfo.listener.onError(t.toString());
+                Tool.dismiss(configInfo.loadingDialog);
 
             }
         });
@@ -284,12 +289,7 @@ public class RetrofitClient extends BaseNet<Call> {
         }else if (configInfo.method == HttpMethod.POST){
             call = service.executePost(configInfo.url,configInfo.params);
         }else {
-
-
-                    configInfo.listener.onError("不是get或post方法");
-
-
-
+            configInfo.listener.onError("不是get或post方法");
             call = null;
             return call;
         }
@@ -300,10 +300,8 @@ public class RetrofitClient extends BaseNet<Call> {
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
 
                 if (!response.isSuccessful()){
-
                             configInfo.listener.onError(response.code()+"");
-
-
+                    Tool.dismiss(configInfo.loadingDialog);
                     return;
                 }
 
@@ -313,12 +311,14 @@ public class RetrofitClient extends BaseNet<Call> {
                     final String finalString = string;
                     //从这里开始,分类进行解析
 
-                    Tool.parseStringByType(configInfo.startTime,string,configInfo);
+                    Tool.parseStringByType(string,configInfo);
+                    Tool.dismiss(configInfo.loadingDialog);
 
                 } catch (final IOException e) {
                     e.printStackTrace();
 
                             configInfo.listener.onError(e.toString());
+                    Tool.dismiss(configInfo.loadingDialog);
 
                 }
 
@@ -328,6 +328,7 @@ public class RetrofitClient extends BaseNet<Call> {
             public void onFailure(Call<ResponseBody> call, final Throwable t) {
 
                         configInfo.listener.onError(t.toString());
+                Tool.dismiss(configInfo.loadingDialog);
 
             }
         });

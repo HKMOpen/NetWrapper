@@ -6,101 +6,7 @@
 
 # update
 
-## 0.1.3 
 
-加上自动显示loadingdialog的功能:
-
-```java
-public ConfigInfo<T> setDialogMinShowTime(int minTime)
-
-public ConfigInfo<T> setShowLoadingDialog(String loadingMsg, Context activity)
-
-public ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog)
-  
-
-```
-
-
-
-面向切面,网络回调加上动态代理:
-
-
-
-```java
-//generateProxy:
-
-protected  <E> void setKeyInfo(ConfigInfo<E> info, String url, Map map, Class<E> clazz, MyNetListener<E> listener){
-        info.url = url;
-        info.params = map;
-        info.clazz = clazz;
-        info.startTime = System.currentTimeMillis();
-        info.listener = ProxyTools.getNetListenerProxy(listener,info);//使用代理
-        info.client = this;
-    }
-
-
-
-
-public static <T> T getNetListenerProxy(final T realObj, final ConfigInfo configInfo){
-      return (T) Proxy.newProxyInstance(ProxyTools.class.getClassLoader(), realObj.getClass().getInterfaces(), new InvocationHandler() {
-          @Override
-          public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
-
-              String name = method.getName();
-              if (!TextUtils.isEmpty(name) ){
-                  if (name.contains("onProgressChange") || name.contains("registEventBus")
-                          || name.contains("unRegistEventBus") || name.contains("onMessage"))
-                  method.invoke(realObj,args);
-              }else {
-                  Tool.parseInTime(configInfo.startTime, configInfo, new Runnable() {
-                      @Override
-                      public void run() {
-                          try {
-                              method.invoke(realObj,args);
-                          } catch (IllegalAccessException e) {
-                              e.printStackTrace();
-                          } catch (InvocationTargetException e) {
-                              e.printStackTrace();
-                          }
-                      }
-                  });
-              }
-
-              return proxy;
-          }
-      });
-
-}
-
-
-
-//int Tool.java:
-
- public static <T> void parseInTime(long startTime, final ConfigInfo<T> configInfo, final Runnable runnable) {
-        long time2 = System.currentTimeMillis();
-        long gap = time2 - startTime;
-        if (configInfo.isForceMinTime ){
-            long minGap = configInfo.minTime <= 0 ? NetDefaultConfig.TIME_MINI : configInfo.minTime;
-
-            if (gap < minGap){
-                TimerUtil.doAfter(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Tool.dismiss(configInfo.loadingDialog);
-                        runnable.run();
-                    }
-                },(minGap - gap));
-            }else {
-                Tool.dismiss(configInfo.loadingDialog);
-                runnable.run();
-            }
-
-        }else {
-            Tool.dismiss(configInfo.loadingDialog);
-            runnable.run();
-        }
-    }
-```
 
 
 
@@ -148,6 +54,12 @@ public static <T> T getNetListenerProxy(final T realObj, final ConfigInfo config
 
 
 
+## 增加自定义请求头的功能
+
+## 增加提交jsonObject的功能
+
+
+
 # usage
 
 
@@ -172,7 +84,7 @@ Step 2. Add the dependency
 
 ```java
 dependencies {
-        compile 'com.github.hss01248:NetWrapper:0.1.3'
+        compile 'com.github.hss01248:NetWrapper:0.1.4'
 }
 ```
 
@@ -284,16 +196,19 @@ public static  int CODE_UN_FOUND = 3;
     MyNetApi:
 
 ```java
+public static void init(Context context,String baseUrl,ILoginManager loginManager)
+  
 /**
- * 指定标准格式json的三个字段.比如聚合api的三个字段分别是error_code(但有的又是resultcode),reason,result,error_code
- * @param data
- * @param code
- * @param msg
- * @param codeSuccess
- * @param codeUnlogin
- * @param codeUnfound
- */
-public static void setStandardJsonKey(String data,String code,String msg,int codeSuccess,int codeUnlogin,int codeUnfound)
+     * 指定标准格式json的三个字段.比如聚合api的三个字段分别是error_code(但有的又是resultcode),reason,result,error_code
+     * @param tokenName 
+     * @param data
+     * @param code
+     * @param msg
+     * @param codeSuccess
+     * @param codeUnlogin
+     * @param codeUnfound
+     */
+    public static void initAppDefault(String tokenName,String data,String code,String msg,int codeSuccess,int codeUnlogin,int codeUnfound)
 ```
 
 ### 单个请求的配置
@@ -306,6 +221,56 @@ public static void setStandardJsonKey(String data,String code,String msg,int cod
  public ConfigInfo<T> setStandardJsonKeyCode(String keyCode)
 
  public ConfigInfo<T> setCustomCodeValue(int code_success,int code_unlogin,int code_unFound)
+```
+
+
+
+## 用本框架发起一个本app常规请求之外的标准json请求:
+
+
+
+```
+			/*	聚合api:笑话大全
+					http://japi.juhe.cn/joke/content/list.from  get请求
+
+
+                    sort	string	是	类型，desc:指定时间之前发布的，asc:指定时间之后发布的
+                    page	int	否	当前页数,默认1
+                    pagesize	int	否	每次返回条数,默认1,最大20
+                    time	string	是	时间戳（10位），如：1418816972
+                    key 	string  您申请的key
+                    
+                    返回:
+                    {
+                      "error_code": 0,
+                       "reason": "Success",
+                       "result": {....}
+                     }
+              */
+                Map<String,String> map4 = new HashMap<>();
+                map4.put("sort","desc");
+                map4.put("page","1");
+                map4.put("pagesize","4");
+                map4.put("time",System.currentTimeMillis()/1000+"");
+                map4.put("key","fuck you");
+
+
+                MyNetApi.getStandardJson("http://japi.juhe.cn/joke/content/list.from",
+                        map4, GetStandardJsonBean.class, new MyNetListener<GetStandardJsonBean>() {
+                            @Override
+                            public void onSuccess(GetStandardJsonBean response, String resonseStr) {
+                                Logger.json(MyJson.toJsonStr(response));
+                            }
+                            @Override
+                            public void onError(String error) {
+                                super.onError(error);
+                                Logger.e(error);
+                            }
+                        })
+                        .setStandardJsonKey("result","error_code","reason")
+                        .setCustomCodeValue(0,2,-1)
+                        .setShowLoadingDialog(MainActivity.this,"加载中...")
+                        .start();
 ```
 
 
@@ -337,22 +302,7 @@ public ConfigInfo<T> setCacheControl(boolean shouldReadCache,boolean shouldCache
 
 
 
-# 请求最短回调时间的设置
-> 主要针对如下情况:
->
-> 发送网络请求之前弹出一个dialog来提示加载中,回调成功后dismiss并关掉整个activity.如果回调很快,可能会出现: dialog还没有弹出来,activity就关掉了,crash,日志为bad windowToken,is your activity running?  这时,需要指定最短回调时间,一般dialog弹出需要几百毫秒不等,限定1s或2s即可.
-
-## 设置:
-
-```java
-/**
- *
- * @param isForceMinTime 是否强制最短时间
- * @param minTime 自定义的最短时间.如果为小于0,则采用默认的1500ms
- * @return
- */
-public ConfigInfo<T> setMinCallbackTime(boolean isForceMinTime,int minTime)
-```
+## 
 
 
 # blog

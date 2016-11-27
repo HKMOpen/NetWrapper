@@ -8,7 +8,6 @@ import android.widget.Button;
 
 import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.interfaces.ILoginManager;
-import com.hss01248.net.retrofit.RetrofitClient;
 import com.hss01248.net.wrapper.MyJson;
 import com.hss01248.net.wrapper.MyNetApi;
 import com.hss01248.net.wrapper.MyNetListener;
@@ -53,7 +52,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        MyNetApi.init(this, RetrofitClient.getInstance(), new ILoginManager() {
+        Logger.init("netapi");
+        NetUtil.init(this,"http://www.qxinli.com:9001/api/", new ILoginManager() {
             @Override
             public boolean isLogin() {
                 return false;
@@ -69,7 +69,8 @@ public class MainActivity extends Activity {
                 return null;
             }
         });
-        Logger.init("net");
+
+        NetUtil.initAppDefault("session_id","data","code","msg",0,5,2);
     }
 
     @OnClick({R.id.get_string, R.id.post_string, R.id.get_json, R.id.post_json, R.id.get_standard_json, R.id.post_standard_json, R.id.download, R.id.upload})
@@ -82,6 +83,11 @@ public class MainActivity extends Activity {
                         Logger.e(response);
 
                     }
+
+                    @Override
+                    public void onError(String error) {
+                        super.onError(error);
+                    }
                 }).start();
                 break;
             case R.id.post_string:
@@ -89,7 +95,7 @@ public class MainActivity extends Activity {
                 map.put("pageSize","30");
                 map.put("articleId","1738");
                 map.put("pageIndex","1");
-                MyNetApi.postString("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postString("article/getArticleCommentList/v1.json",
                         map,  new MyNetListener<String>() {
                     @Override
                     public void onSuccess(String response, String resonseStr) {
@@ -98,21 +104,22 @@ public class MainActivity extends Activity {
                 }).start();
                 break;
             case R.id.get_json:
-                Map<String,String> map2 = new HashMap<>();
-                MyNetApi.getCommonJson("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
-                        map2, GetCommonJsonBean.class, new MyNetListener<GetCommonJsonBean>() {
+
+                MyNetListener<GetCommonJsonBean> listener = new MyNetListener<GetCommonJsonBean>() {
                     @Override
                     public void onSuccess(GetCommonJsonBean response, String resonseStr) {
                         Logger.json(MyJson.toJsonStr(response));
                     }
-                }).start();
+                };
+                Map<String,String> map2 = new HashMap<>();
+                MyNetApi.getCommonJson("version/latestVersion/v1.json",map2, GetCommonJsonBean.class, listener).setShowLoadingDialog(MainActivity.this,"加载中...").start();
                 break;
             case R.id.post_json:
                 Map<String,String> map3 = new HashMap<>();
                 map3.put("pageSize","30");
                 map3.put("articleId","1738");
                 map3.put("pageIndex","1");
-                MyNetApi.postCommonJson("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postCommonJson("article/getArticleCommentList/v1.json",
                         map3, PostCommonJsonBean.class, new MyNetListener<PostCommonJsonBean>() {
                     @Override
                     public void onSuccess(PostCommonJsonBean response, String resonseStr) {
@@ -122,20 +129,38 @@ public class MainActivity extends Activity {
 
                 break;
             case R.id.get_standard_json:
+
+                /*	聚合api:笑话大全
+
+                    sort	string	是	类型，desc:指定时间之前发布的，asc:指定时间之后发布的
+                    page	int	否	当前页数,默认1
+                    pagesize	int	否	每次返回条数,默认1,最大20
+                    time	string	是	时间戳（10位），如：1418816972
+                    key 	string  您申请的key*/
                 Map<String,String> map4 = new HashMap<>();
-                MyNetApi.getStandardJson("http://www.qxinli.com:9001/api/version/latestVersion/v1.json",
+                map4.put("sort","desc");
+                map4.put("page","1");
+                map4.put("pagesize","4");
+                map4.put("time",System.currentTimeMillis()/1000+"");
+                map4.put("key","fuck you");
+
+
+                MyNetApi.getStandardJson("http://japi.juhe.cn/joke/content/list.from",
                         map4, GetStandardJsonBean.class, new MyNetListener<GetStandardJsonBean>() {
                             @Override
                             public void onSuccess(GetStandardJsonBean response, String resonseStr) {
                                 Logger.json(MyJson.toJsonStr(response));
                             }
-
                             @Override
                             public void onError(String error) {
                                 super.onError(error);
-                                Logger.e("code:"+error);
+                                Logger.e(error);
                             }
-                        }).start();
+                        })
+                        .setStandardJsonKey("result","error_code","reason")
+                        .setCustomCodeValue(0,2,-1)
+                        .setShowLoadingDialog(MainActivity.this,"加载中...")
+                        .start();
                 break;
             case R.id.post_standard_json:
 
@@ -143,7 +168,7 @@ public class MainActivity extends Activity {
                 map5.put("pageSize","30");
                 map5.put("articleId","1738");
                 map5.put("pageIndex","1");
-                MyNetApi.postStandardJson("http://www.qxinli.com:9001/api/article/getArticleCommentList/v1.json",
+                MyNetApi.postStandardJson("article/getArticleCommentList/v1.json",
                         map5, PostStandardJsonArray.class, new MyNetListener<PostStandardJsonArray>() {
                             @Override
                             public void onSuccess(PostStandardJsonArray response, String resonseStr) {
@@ -178,7 +203,7 @@ public class MainActivity extends Activity {
                         super.onProgressChange(fileSize, downloadedSize);
                         Logger.e("progress:"+downloadedSize);
                     }
-                }).start();
+                }).setShowLoadingDialog(MainActivity.this,"下载中...").start();
                 break;
             case R.id.upload:
 

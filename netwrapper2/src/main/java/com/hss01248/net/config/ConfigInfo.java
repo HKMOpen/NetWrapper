@@ -1,10 +1,12 @@
 package com.hss01248.net.config;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.hss01248.lib.StytledDialog;
+
 import com.hss01248.net.interfaces.INet;
 import com.hss01248.net.wrapper.MyNetApi;
 import com.hss01248.net.wrapper.MyNetListener;
@@ -136,7 +138,7 @@ public class ConfigInfo<T> {
     }
 
 
-    //強制控制回調的最短時間,默認不控制,如果需要,則自己寫.单位毫秒
+   /* //強制控制回調的最短時間,默認不控制,如果需要,則自己寫.单位毫秒
     public  int minTime = 0;
 
     public long startTime;
@@ -148,7 +150,7 @@ public class ConfigInfo<T> {
             this.minTime = NetDefaultConfig.TIME_MINI;
         }
         return this;
-    }
+    }*/
 
 
     /**
@@ -157,7 +159,7 @@ public class ConfigInfo<T> {
      * @param activity  Context ,最好传入activity,当然context也可以
      * @return
      */
-    public ConfigInfo<T> setShowLoadingDialog(String loadingMsg, Context activity){
+    public ConfigInfo<T> setShowLoadingDialog( Activity activity,String loadingMsg){
         return setShowLoadingDialog(null,loadingMsg,activity,0);
     }
 
@@ -172,35 +174,41 @@ public class ConfigInfo<T> {
 
 
 
-    private ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog,String msg,Context activity,int minTime){
+    private ConfigInfo<T> setShowLoadingDialog(Dialog loadingDialog, String msg, Activity activity, int minTime){
         if (loadingDialog == null){
             if (TextUtils.isEmpty(msg)){
                 msg = "加载中...";
             }
             if (activity == null){
-                this.loadingDialog = StytledDialog.showProgressDialog(MyNetApi.context,msg,false,false);//todo 生成dialog,先不显示
+                this.loadingDialog = null;//todo 生成dialog,先不显示
             }else {
-                this.loadingDialog = StytledDialog.showProgressDialog(activity,msg,false,false);
+                try {
+                    this.loadingDialog = ProgressDialog.show(activity, "", msg,false, true);
+                }catch (Exception e){
+
+                }
+
+
             }
 
         }else {
             this.loadingDialog = loadingDialog;
         }
 
-        this.isForceMinTime = true;
+      /*  this.isForceMinTime = true;
 
         if (minTime >NetDefaultConfig.TIME_MINI){
             this.minTime = minTime;
         }else {
             this.minTime = NetDefaultConfig.TIME_MINI;
-        }
+        }*/
 
         return this;
     }
 
 
 
-    public boolean isForceMinTime = false;
+   // public boolean isForceMinTime = false;
 
     public Dialog loadingDialog;
 

@@ -7,8 +7,7 @@ import com.hss01248.net.config.ConfigInfo;
 import com.hss01248.net.config.HttpMethod;
 import com.hss01248.net.interfaces.ILoginManager;
 import com.hss01248.net.interfaces.INet;
-import com.hss01248.net.old.CommonHelper;
-import com.hss01248.net.old.MyNetUtil;
+
 import com.litesuits.android.async.SimpleTask;
 
 import java.util.HashMap;
@@ -29,8 +28,8 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
         info.url = url;
         info.params = map;
         info.clazz = clazz;
-        info.startTime = System.currentTimeMillis();
-        info.listener = ProxyTools.getNetListenerProxy(listener,info);//使用代理
+
+        info.listener = listener;//ProxyTools.getNetListenerProxy(listener,info);//使用代理:java.lang.ClassCastException: $Proxy1 cannot be cast to com.hss01248.net.wrapper.MyNetListener
         info.client = this;
     }
 
@@ -159,7 +158,12 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
         }
 
         if (configInfo.loadingDialog != null && !configInfo.loadingDialog.isShowing()){
-            configInfo.loadingDialog.show();
+            try {
+                configInfo.loadingDialog.show();
+            }catch (Exception e){
+
+            }
+
         }
 
        // configInfo.client = this;
@@ -233,12 +237,12 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
                 //拿缓存
                 if (configInfo.shouldReadCache){
 
-                    final long time = System.currentTimeMillis();
+
                     SimpleTask<String> simple = new SimpleTask<String>() {
 
                         @Override
                         protected String doInBackground() {
-                            return ACache.get(MyNetUtil.context).getAsString(CommonHelper.getCacheKey(configInfo));
+                            return ACache.get(MyNetApi.context).getAsString(Tool.getCacheKey(configInfo));
                         }
 
                         @Override
@@ -250,7 +254,7 @@ public  abstract class BaseNet<T> implements INet {//T: 请求类  call或者是
                                 start(configInfo);//没有缓存就去访问网络
                             }else {
                                 configInfo.isFromCache = true;
-                                Tool.parseStringByType(time,result,configInfo);
+                                Tool.parseStringByType(result,configInfo);
                             }
 
                         }

@@ -3,6 +3,7 @@ package com.hss01248.net.wrapper;
 
 import android.text.TextUtils;
 
+import com.hss01248.net.interfaces.IListener;
 import com.hss01248.net.retrofit.progress.ProgressEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/4/15 0015.
  */
-public abstract class MyNetListener<T> {
+public abstract class MyNetListener<T> implements IListener<T> {
 
     public String url;
 
@@ -49,11 +50,15 @@ public abstract class MyNetListener<T> {
 
 
 
+
+
     /**
      * Callback method that an error has been occurred with the
      * provided error code and optional user-readable message.
      */
-    public void onError(String error) {}
+    public void onError(String error) {
+
+    }
 
 
     /**
