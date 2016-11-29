@@ -23,6 +23,10 @@ public class ConfigInfo<T> {
     public int method = HttpMethod.GET;
     public String url;
     public Map<String,String> params ;
+
+
+
+    public boolean paramsAsJson = false;
     public int type = TYPE_STRING;//请求的类型,6类中的一种
 
     //回调
@@ -42,6 +46,10 @@ public class ConfigInfo<T> {
     public int code_unFound;
 
     public boolean isCustomCodeSet;
+
+    public void setParamsAsJson() {
+        this.paramsAsJson = true;
+    }
 
 
     /**
