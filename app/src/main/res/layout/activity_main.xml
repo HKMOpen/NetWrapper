@@ -61,4 +61,10 @@
         android:layout_height="wrap_content"
         android:text="upload"
         android:id="@+id/upload"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post by json"
+        android:id="@+id/postbyjson"/>
 </LinearLayout>

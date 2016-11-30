@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/4/24.
@@ -31,6 +32,8 @@ public class MyJson {
        // return new Gson().fromJson(str,new TypeToken<List<E>>() {}.getType());
          return JSON.parseArray(str,clazz);
     }
+
+
 
 
     /**

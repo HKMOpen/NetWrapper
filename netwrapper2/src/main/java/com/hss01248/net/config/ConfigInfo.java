@@ -22,7 +22,7 @@ public class ConfigInfo<T> {
     //核心参数
     public int method = HttpMethod.GET;
     public String url;
-    public Map<String,String> params ;
+    public Map params ;
 
 
 
@@ -47,8 +47,21 @@ public class ConfigInfo<T> {
 
     public boolean isCustomCodeSet;
 
-    public void setParamsAsJson() {
+    public boolean isResponseJsonArray() {
+        return isResponseJsonArray;
+    }
+
+    public ConfigInfo<T> setResponseJsonArray() {
+        isResponseJsonArray = true;
+        return this;
+    }
+
+    private boolean isResponseJsonArray = false;
+
+
+    public ConfigInfo<T> setParamsAsJson() {
         this.paramsAsJson = true;
+        return this;
     }
 
 

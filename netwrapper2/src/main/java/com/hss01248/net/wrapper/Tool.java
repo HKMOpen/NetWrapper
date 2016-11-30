@@ -185,8 +185,12 @@ public class Tool {
 
         if (code == codeSuccess){
             if (isJsonEmpty(data)){
-                configInfo.listener.onEmpty();
 
+                if(configInfo.isResponseJsonArray()){
+                    configInfo.listener.onEmpty();
+                }else {
+                    configInfo.listener.onError("数据为空");
+                }
             }else {
                 try{
                     if (data.startsWith("{")){
@@ -218,10 +222,7 @@ public class Tool {
 
                 }catch (final Exception e){
                     e.printStackTrace();
-
-
-                            configInfo.listener.onError(e.toString());
-
+                    configInfo.listener.onError(e.toString());
                     return;
                 }
             }
@@ -245,7 +246,7 @@ public class Tool {
                 }
             });
         }else {
-                    configInfo.listener.onCodeError("",msg,code);
+                    configInfo.listener.onCodeError(msg,"",code);
         }
 
     }

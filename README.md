@@ -22,13 +22,13 @@
 
 
 
-
+post提交一个json数据
 
 
 
 # todo
 
-## 下载策略
+## 1.下载策略
 
 ```
 /**
@@ -46,17 +46,17 @@
 
 
 
-## 缓存
+## 2.缓存
 
 无网络时读缓存
 
 缓存文件夹大小的设置
 
+缓存功能改回由okhttp框架去实现,第一层控制请求头和响应头就好.
 
 
-## 增加自定义请求头的功能
 
-## 增加提交jsonObject的功能
+### 
 
 
 
@@ -142,11 +142,19 @@ boolean isLogin();
 
 
 
-## 供链式调用的相关的set方法有:
-
- ![setmethods](setmethods.jpg)
+## 概览
 
 
+
+ ![基本api](基本api.jpg)
+
+
+
+
+
+
+
+ ![自定义api](自定义api.jpg)
 
 ## json的解析: 
 
@@ -277,12 +285,7 @@ public static void init(Context context,String baseUrl,ILoginManager loginManage
 
 # 完全的客户端缓存控制
 
-## 屏蔽原网络框架本身的缓存功能:
-> 主要是因为,okhttp只缓存get请求,不缓存post请求.但实际工作中有时需要缓存post请求的数据.
-
-
-
->屏蔽的思路: 请求头cacheControl指定为no-cache,然后用拦截器修改响应头,移除expeirs,pragma之类的字段并把cacheControl改为no-cache.
+> 已屏蔽下层网络执行层(okhttp)框架本身的缓存功能.
 
 ## 配置单个请求的缓存策略(默认是无缓存)
 

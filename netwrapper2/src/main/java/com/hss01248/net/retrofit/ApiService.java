@@ -42,6 +42,16 @@ public interface  ApiService {
     @POST()
     Call<ResponseBody> executePost(@Url String url, @FieldMap Map<String, String> maps);
 
+
+    /**
+     * 直接post体为一个json格式时,使用这个方法.注意:@Body 不能与@FormUrlEncoded共存
+     * @param url
+     * @param body
+     * @return
+     */
+    @POST()
+    Call<ResponseBody> executeJsonPost(@Url String url, @Body RequestBody body);//
+
     @GET()
     Call<ResponseBody> executGet(@Url String url, @QueryMap Map<String, String> maps);
 

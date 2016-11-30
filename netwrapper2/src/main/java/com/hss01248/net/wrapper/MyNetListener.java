@@ -19,9 +19,7 @@ public abstract class MyNetListener<T> implements IListener<T> {
 
     public String url;
 
-    public    void onUnlogin(){
-        onError("您还没有登录");
-    }
+
 
 
     /**
@@ -56,24 +54,20 @@ public abstract class MyNetListener<T> implements IListener<T> {
      * Callback method that an error has been occurred with the
      * provided error code and optional user-readable message.
      */
-    public void onError(String error) {
-
-    }
+    public void onError(String msgCanShow) {}
 
 
     /**
      * 有错误码的error
-     * @param error
-     * @param msg
+
      * @param code
      */
-    public void onCodeError(String error,String msg,int code) {
-        if (TextUtils.isEmpty(msg)){
-            onError(code+"");
+    public void onCodeError(String msgCanShow,String hiddenMsg,int code) {
+        if (TextUtils.isEmpty(msgCanShow)){
+            onError("错误码为:"+code);
         }else {
-            onError(msg);
+            onError(msgCanShow);
         }
-
     }
 
 
@@ -82,6 +76,18 @@ public abstract class MyNetListener<T> implements IListener<T> {
     public void onUnFound() {
         onError("没有找到该内容");
     }
+    public    void onUnlogin(){
+        onError("您还没有登录");
+    }
+
+
+
+    /**
+     * 都是B作为单位
+     */
+    public void onProgressChange(long fileSize, long downloadedSize) {}
+
+    public void onFinish(){}
 
 
     public void onNetworking() {}
@@ -92,16 +98,6 @@ public abstract class MyNetListener<T> implements IListener<T> {
 
 
     public void onRetry() {}
-
-    /**
-     * 都是B作为单位
-     */
-    public void onProgressChange(long fileSize, long downloadedSize) {
-    }
-
-    public void onFinish(){
-
-    }
 
 
     /**

@@ -1,5 +1,6 @@
 package com.hss01248.net.retrofit;
 
+import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.Log;
 
 import com.hss01248.net.config.ConfigInfo;
@@ -8,6 +9,7 @@ import com.hss01248.net.config.NetDefaultConfig;
 import com.hss01248.net.retrofit.progress.ProgressInterceptor;
 import com.hss01248.net.retrofit.progress.UploadFileRequestBody;
 import com.hss01248.net.wrapper.BaseNet;
+import com.hss01248.net.wrapper.MyJson;
 import com.hss01248.net.wrapper.Tool;
 import com.litesuits.android.async.SimpleTask;
 
@@ -20,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -287,7 +291,24 @@ public class RetrofitClient extends BaseNet<Call> {
         if (configInfo.method == HttpMethod.GET){
             call = service.executGet(configInfo.url,configInfo.params);
         }else if (configInfo.method == HttpMethod.POST){
-            call = service.executePost(configInfo.url,configInfo.params);
+
+            if(configInfo.paramsAsJson){
+
+                String jsonStr = MyJson.toJsonStr(configInfo.params);
+
+                Log.e("dd","jsonstr request:"+jsonStr);
+
+
+
+                RequestBody body = RequestBody.create(MediaType.parse("application/json;charset=UTF-8"), jsonStr);
+                call = service.executeJsonPost(configInfo.url,body);
+
+            }else {
+                call = service.executePost(configInfo.url,configInfo.params);
+            }
+
+
+
         }else {
             configInfo.listener.onError("不是get或post方法");
             call = null;

@@ -15,6 +15,7 @@ import com.hss01248.netdemo.bean.GetCommonJsonBean;
 import com.hss01248.netdemo.bean.GetStandardJsonBean;
 import com.hss01248.netdemo.bean.PostCommonJsonBean;
 import com.hss01248.netdemo.bean.PostStandardJsonArray;
+import com.hss01248.netdemo.bean.VersionInfo;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public class MainActivity extends Activity {
         NetUtil.initAppDefault("session_id","data","code","msg",0,5,2);
     }
 
-    @OnClick({R.id.get_string, R.id.post_string, R.id.get_json, R.id.post_json, R.id.get_standard_json, R.id.post_standard_json, R.id.download, R.id.upload})
+    @OnClick({R.id.get_string, R.id.post_string, R.id.get_json, R.id.post_json, R.id.get_standard_json, R.id.post_standard_json, R.id.download, R.id.upload,R.id.postbyjson})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.get_string:
@@ -235,6 +236,35 @@ public class MainActivity extends Activity {
                             }
                         }).start();
                 break;
+
+            case R.id.postbyjson:
+
+                Map map8 = new HashMap<>();
+                map8.put("versionName","1.0.0");
+                map8.put("appType","0");
+                MyNetApi.postStandardJson("http://app.cimc.com:9090/app/appVersion/getLatestVersion",
+                        map8, VersionInfo.class, new MyNetListener<VersionInfo>() {
+
+
+                            @Override
+                            public void onSuccess(VersionInfo response, String resonseStr) {
+                                Logger.e(resonseStr);
+                            }
+
+                            @Override
+                            public void onEmpty() {
+                                super.onEmpty();
+                            }
+
+                            @Override
+                            public void onError(String msgCanShow) {
+                                super.onError(msgCanShow);
+                                Logger.e(msgCanShow);
+                            }
+                        }).setParamsAsJson().setIsAppendToken(false).setCustomCodeValue(1,2,3).start();
+                break;
+
+
         }
     }
 
