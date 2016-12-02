@@ -261,7 +261,11 @@ public class MainActivity extends Activity {
                                 super.onError(msgCanShow);
                                 Logger.e(msgCanShow);
                             }
-                        }).setParamsAsJson().setIsAppendToken(false).setCustomCodeValue(1,2,3).start();
+                        })
+                        .setParamsAsJson()
+                        .setIsAppendToken(false)
+                        .setCustomCodeValue(1,2,3)
+                        .start();
                 break;
 
 

@@ -310,4 +310,5 @@ public ConfigInfo<T> setCacheControl(boolean shouldReadCache,boolean shouldCache
 
 # blog
 
-[retrofit callback模式的封装](http://www.jianshu.com/p/8a67302a3377)
+[基于retrofit的网络框架的终极封装(一):第一层参数组装层的API设计](http://gold.xitu.io/post/583e9c39ac502e006c365801)
+
